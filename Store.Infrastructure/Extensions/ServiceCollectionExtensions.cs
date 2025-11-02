@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Store.Domain.Repositories;
 using Store.Infrastructure.Persistence;
+using Store.Infrastructure.Repositories;
 
 namespace Store.Infrastructure.Extensions
 {
@@ -11,6 +13,8 @@ namespace Store.Infrastructure.Extensions
         {
             var connectionString = configuration.GetConnectionString("StoreDb");
             services.AddDbContext<StoreDbContext>(options => options.UseSqlServer(connectionString));
+
+            services.AddScoped<ICollectionRepository, CollectionRepository>();
         }
     }
 }
