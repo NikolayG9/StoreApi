@@ -23,6 +23,8 @@ namespace Store.Infrastructure.Repositories
 
         public async Task<Collection> CreateAsync(Collection collection, CancellationToken cancellationToken)
         {
+            collection.CreatedAt = DateTime.Now;
+
             await dbContext.Collections.AddAsync(collection, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
 

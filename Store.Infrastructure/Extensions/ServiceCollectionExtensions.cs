@@ -15,6 +15,7 @@ namespace Store.Infrastructure.Extensions
             services.AddDbContext<StoreDbContext>(options => options.UseSqlServer(connectionString));
 
             services.AddScoped<ICollectionRepository, CollectionRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
         }
     }
 }

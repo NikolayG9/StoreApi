@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using Store.Application.Collections;
-using Store.Application.Collections.Dtos;
+using Store.Application.Services;
+using Store.Application.Services.Interfaces;
 using Store.Application.Validators;
 
 namespace Store.Application.Extensions
@@ -15,9 +15,11 @@ namespace Store.Application.Extensions
 
             // Services
             services.AddScoped<ICollectionService, CollectionService>();
+            services.AddScoped<IProductService, ProductService>();
 
             // Validators
             services.AddValidatorsFromAssemblyContaining(typeof(CollectionDtoValidator));
+            services.AddValidatorsFromAssemblyContaining(typeof(ProductDtoValidator));
         }
     }
 }

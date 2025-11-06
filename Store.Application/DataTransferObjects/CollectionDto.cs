@@ -1,4 +1,4 @@
-﻿namespace Store.Application.Collections.Dtos
+﻿namespace Store.Application.DataTransferObjects
 {
     public class CollectionDto
     {
