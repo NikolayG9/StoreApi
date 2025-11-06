@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
-using Store.Application.Collections.Dtos;
+using Store.Application.DataTransferObjects;
+using Store.Application.Services.Interfaces;
 using Store.Domain.Entities;
 using Store.Domain.Exceptions;
 using Store.Domain.Repositories;
 
-namespace Store.Application.Collections
+namespace Store.Application.Services
 {
     public class CollectionService : ICollectionService
     {
@@ -39,7 +40,7 @@ namespace Store.Application.Collections
         {
             _logger.LogInformation($"Getting Collection By Id = {id}");
             var collection = await _collectionRepository.GetByIdAsync(id, cancellationToken);
-            if (collection is null)
+            if (collection == null)
             {
                 throw new NotFoundException(nameof(Collection), id.ToString());
             }
@@ -54,7 +55,6 @@ namespace Store.Application.Collections
             await CheckCollectionDtoValidation(collectionDto, cancellationToken);
 
             var collection = _mapper.Map<Collection>(collectionDto);
-            collection.CreatedAt = DateTime.Now;
 
             var createdCollection = await _collectionRepository.CreateAsync(collection, cancellationToken);
             return _mapper.Map<CollectionDto>(createdCollection);

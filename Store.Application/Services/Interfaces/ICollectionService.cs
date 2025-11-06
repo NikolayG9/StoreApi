@@ -1,6 +1,6 @@
-﻿using Store.Application.Collections.Dtos;
+﻿using Store.Application.DataTransferObjects;
 
-namespace Store.Application.Collections
+namespace Store.Application.Services.Interfaces
 {
     public interface ICollectionService
     {

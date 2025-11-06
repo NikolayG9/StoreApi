@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Store.Application.Collections;
-using Store.Application.Collections.Dtos;
+using Store.Application.DataTransferObjects;
+using Store.Application.Services.Interfaces;
 
 namespace Store.API.Controllers
 {

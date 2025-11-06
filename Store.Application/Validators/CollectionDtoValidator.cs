@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
-using Store.Application.Collections.Dtos;
+using Store.Application.DataTransferObjects;
+using Store.Application.Helpers;
 
 namespace Store.Application.Validators
 {
@@ -9,9 +10,9 @@ namespace Store.Application.Validators
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
-                .WithMessage("Name is required")
+                .WithMessage(ValidationHelper.GetRequiredMessage(nameof(CollectionDto.Name)))
                 .MaximumLength(30)
-                .WithMessage("Length of the name cannot be more than 30 symbols");
+                .WithMessage(ValidationHelper.GetMaxLengthMessage(nameof(CollectionDto.Name), 30));
         }
     }
 }
