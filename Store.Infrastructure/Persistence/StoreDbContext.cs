@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Store.Domain.Entities;
 using Store.Infrastructure.Configurations;
 
 namespace Store.Infrastructure.Persistence
 {
-    internal class StoreDbContext(DbContextOptions<StoreDbContext> options) : DbContext(options)
+    internal class StoreDbContext(DbContextOptions<StoreDbContext> options) 
+        : IdentityDbContext<User>(options)
     {
         internal DbSet<Collection> Collections { get; set; }
         internal DbSet<Product> Products { get; set; }
