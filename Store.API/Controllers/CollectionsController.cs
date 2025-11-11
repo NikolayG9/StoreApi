@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Store.Application.DataTransferObjects;
 using Store.Application.Services.Interfaces;
+using Store.Domain.Constants;
 
 namespace Store.API.Controllers
 {
@@ -30,6 +32,7 @@ namespace Store.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> CreateCollectionAsync([FromBody] CollectionDto collectionDto, CancellationToken cancellationToken)
         {
             var createdCollection = await _collectionService.CreateAsync(collectionDto, cancellationToken);
@@ -37,6 +40,7 @@ namespace Store.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> UpdateCollectionAsync([FromBody]CollectionDto collectionDto, CancellationToken cancellationToken)
         {
             var updatedCollection = await _collectionService.UpdateAsync(collectionDto, cancellationToken);
@@ -44,6 +48,7 @@ namespace Store.API.Controllers
         }
 
         [HttpDelete("id")]
+        [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> DeleteCollectionAsync([FromRoute]int id, CancellationToken cancellationToken)
         {
             var isCollectionDeleted = await _collectionService.DeleteAsync(id, cancellationToken);

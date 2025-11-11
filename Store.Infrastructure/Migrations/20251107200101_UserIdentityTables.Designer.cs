@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Store.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Store.Infrastructure.Persistence;
 namespace Store.Infrastructure.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    partial class StoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251107200101_UserIdentityTables")]
+    partial class UserIdentityTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,9 +257,6 @@ namespace Store.Infrastructure.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("OrderInformationId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -267,13 +267,7 @@ namespace Store.Infrastructure.Migrations
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
                 });
@@ -321,9 +315,6 @@ namespace Store.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -334,9 +325,12 @@ namespace Store.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId")
+                    b.HasIndex("ProductId")
                         .IsUnique();
 
                     b.ToTable("OrdersInformation");
@@ -400,16 +394,15 @@ namespace Store.Infrastructure.Migrations
                     b.Property<decimal?>("Discount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<int>("OrderId")
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId1")
                         .HasColumnType("int");
 
                     b.Property<int>("ProductQuantity")
@@ -427,7 +420,9 @@ namespace Store.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductId1");
 
                     b.ToTable("OrderedProducts");
                 });
@@ -585,22 +580,11 @@ namespace Store.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Store.Domain.Entities.Order", b =>
-                {
-                    b.HasOne("Store.Domain.Entities.User", "User")
-                        .WithMany("Orders")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Store.Domain.Entities.OrderInformation", b =>
                 {
                     b.HasOne("Store.Domain.Entities.Order", null)
                         .WithOne("OrderInformation")
-                        .HasForeignKey("Store.Domain.Entities.OrderInformation", "OrderId")
+                        .HasForeignKey("Store.Domain.Entities.OrderInformation", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -610,7 +594,7 @@ namespace Store.Infrastructure.Migrations
                     b.HasOne("Store.Domain.Entities.Collection", null)
                         .WithMany("Products")
                         .HasForeignKey("CollectionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -618,9 +602,17 @@ namespace Store.Infrastructure.Migrations
                 {
                     b.HasOne("Store.Domain.Entities.Order", null)
                         .WithMany("OrderedProducts")
-                        .HasForeignKey("OrderId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Store.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Store.Domain.Entities.Collection", b =>
@@ -641,11 +633,6 @@ namespace Store.Infrastructure.Migrations
                     b.Navigation("Colors");
 
                     b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("Store.Domain.Entities.User", b =>
-                {
-                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

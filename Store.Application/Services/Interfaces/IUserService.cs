@@ -1,0 +1,9 @@
+﻿using Store.Application.DataTransferObjects;
+
+namespace Store.Application.Services.Interfaces
+{
+    public interface IUserService
+    {
+        Task<bool> RegisterUserAsync(UserDto userDto, CancellationToken cancellationToken);
+    }
+}
