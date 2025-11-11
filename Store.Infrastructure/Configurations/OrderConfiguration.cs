@@ -12,10 +12,10 @@ namespace Store.Infrastructure.Configurations
             
             builder.HasMany(o => o.OrderedProducts)
                    .WithOne()
-                   .HasForeignKey(p => p.ProductId);
+                   .HasForeignKey(p => p.OrderId);
             builder.HasOne(o => o.OrderInformation)
                    .WithOne()
-                   .HasForeignKey<OrderInformation>(i => i.ProductId);
+                   .HasForeignKey<OrderInformation>(i => i.OrderId);
 
             builder.Property(x => x.TotalPrice).IsRequired();
             builder.Property(x => x.TotalDiscount).HasDefaultValue(null);

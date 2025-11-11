@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Store.Application.DataTransferObjects;
 using Store.Application.Services.Interfaces;
+using Store.Domain.Constants;
 
 namespace Store.API.Controllers
 {
@@ -30,6 +32,7 @@ namespace Store.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> AddProductAsync([FromBody]ProductDto productDto, CancellationToken cancellationToken)
         {
             var result = await _productService.CreateAsync(productDto, cancellationToken);
@@ -37,6 +40,7 @@ namespace Store.API.Controllers
         }
 
         [HttpPut("{productId}")]
+        [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> UpdateProductAsync([FromBody]ProductDto productDto, CancellationToken cancellationToken)
         {
             var result = await _productService.UpdateAsync(productDto, cancellationToken);
@@ -44,6 +48,7 @@ namespace Store.API.Controllers
         }
 
         [HttpDelete("{productId}")]
+        [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> DeleteProductAsync([FromRoute]int productId, CancellationToken cancellationToken)
         {
             var result = await _productService.DeleteAsync(productId, cancellationToken);

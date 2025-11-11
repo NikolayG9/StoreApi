@@ -3,20 +3,22 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Store.Application.DataTransferObjects;
 using Store.Application.Services.Interfaces;
+using Store.Domain.Constants;
 using Store.Domain.Exceptions;
 using Entity = Store.Domain.Entities;
 
 namespace Store.Application.Services
 {
     public class UserService(
-        SignInManager<Entity.User> signInManager,
+        UserManager<Entity.User> userManager,
+        RoleManager<IdentityRole> roleManager,
         IValidator<UserDto> validator,
         ILogger<UserService> logger) 
         : IUserService
     {
         public async Task<bool> RegisterUserAsync(UserDto userDto, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Register new user");
+            logger.LogInformation($"Register new user - {userDto.Email}");
 
             var validationResult = await validator.ValidateAsync(userDto, cancellationToken);
             if (!validationResult.IsValid)
@@ -36,12 +38,17 @@ namespace Store.Application.Services
                 RegistrationDate = DateTime.UtcNow
             };
 
-            var userResult = await signInManager.UserManager.CreateAsync(user, userDto.Password);
+            var userResult = await userManager.CreateAsync(user, userDto.Password);
 
             if (!userResult.Succeeded)
             {
                 throw new InvalidOperationException(userResult.Errors.ToString());
             }
+
+            var createdUser = await userManager.FindByEmailAsync(userDto.Email) 
+                ?? throw new NotFoundException(nameof(UserDto), userDto.Email);
+
+            await userManager.AddToRoleAsync(createdUser, UserRole.Client);
 
             return userResult.Succeeded;
         }

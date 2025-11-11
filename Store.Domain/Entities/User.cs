@@ -9,5 +9,6 @@ namespace Store.Domain.Entities
         public string Country { get; set; }
         public string City { get; set; }
         public DateTime RegistrationDate { get; set; }
+        public IEnumerable<Order> Orders { get; set; }
     }
 }

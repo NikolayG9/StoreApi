@@ -12,6 +12,6 @@
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public string OrderDetails { get; set; }
-        public int ProductId { get; set; }
+        public int OrderId { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Store.Domain.Entities;
@@ -16,10 +17,12 @@ namespace Store.Infrastructure.Extensions
             services.AddDbContext<StoreDbContext>(options => options.UseSqlServer(connectionString));
 
             services.AddIdentityApiEndpoints<User>()
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<StoreDbContext>();
 
             services.AddScoped<ICollectionRepository, CollectionRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
         }
     }
 }

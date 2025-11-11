@@ -9,9 +9,12 @@
         public DateTime OrderDate { get; set; }
         public bool IsSoftDeleted { get; set; }
         
-        // User
+        public string UserId { get; set; }
+        public User User { get; set; }
 
+        public int OrderInformationId { get; set; }
         public OrderInformation OrderInformation { get; set; }
+        
         public List<ProductOrder> OrderedProducts { get; set; }
     }
 }

@@ -22,6 +22,7 @@ namespace Store.Application.Extensions
             services.AddScoped<ICollectionService, CollectionService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IRoleService, RoleService>();
 
             // Validators
             services.AddValidatorsFromAssemblyContaining(typeof(CollectionDtoValidator));

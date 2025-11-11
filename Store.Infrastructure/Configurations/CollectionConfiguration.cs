@@ -11,7 +11,8 @@ namespace Store.Infrastructure.Configurations
             builder.HasKey(x => x.Id);
             builder.HasMany(c => c.Products)
                    .WithOne()
-                   .HasForeignKey(p => p.CollectionId);
+                   .HasForeignKey(p => p.CollectionId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(x => x.Name).HasMaxLength(30).IsRequired();
             builder.Property(x => x.CreatedAt).IsRequired();
