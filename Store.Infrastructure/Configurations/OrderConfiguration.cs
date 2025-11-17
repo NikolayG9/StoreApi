@@ -15,7 +15,7 @@ namespace Store.Infrastructure.Configurations
                    .HasForeignKey(p => p.OrderId);
             builder.HasOne(o => o.OrderInformation)
                    .WithOne()
-                   .HasForeignKey<OrderInformation>(i => i.OrderId);
+                   .HasForeignKey<Order>(o => o.OrderInformationId);
 
             builder.Property(x => x.TotalPrice).IsRequired();
             builder.Property(x => x.TotalDiscount).HasDefaultValue(null);

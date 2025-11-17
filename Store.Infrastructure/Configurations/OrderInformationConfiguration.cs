@@ -17,7 +17,7 @@ namespace Store.Infrastructure.Configurations
             builder.Property(x => x.PostalCode).HasMaxLength(20).IsRequired();
             builder.Property(x => x.PhoneNumber).HasMaxLength(30).IsRequired();
             builder.Property(x => x.Email).HasMaxLength(100).IsRequired();
-            builder.Property(x => x.OrderDetails).HasMaxLength(500).IsRequired();
+            builder.Property(x => x.OrderDetails).HasMaxLength(500);
         }
     }
 }

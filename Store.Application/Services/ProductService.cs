@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Store.Application.Common.Models;
 using Store.Application.DataTransferObjects;
 using Store.Application.Services.Interfaces;
 using Store.Domain.Entities;
@@ -11,6 +12,8 @@ namespace Store.Application.Services
 {
     public class ProductService : IProductService
     {
+        private int[] allowPageSizes = [5, 10, 15, 30];
+
         private readonly IProductRepository _repository;
         private readonly ILogger<ProductService> _logger;
         private readonly IValidator<ProductDto> _validator;
@@ -30,10 +33,25 @@ namespace Store.Application.Services
 
         public async Task<IEnumerable<ProductDto>> GetByCollectionIdAsync(int collectionId, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"Getting Product By Collection Id = {collectionId}");
+            _logger.LogInformation($"Getting Products By Collection Id = {collectionId}");
             var products = await _repository.GetByCollectionIdAsync(collectionId, cancellationToken);
 
             return _mapper.Map<IEnumerable<ProductDto>>(products);
+        }
+
+        public async Task<SearchResponse<ProductDto>> GetByCollectionIdWithParamsAsync(int collectionId, SearchRequest searchRequest, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"Getting Products By Collection Id And Params");
+            if (searchRequest.PageNumber < 1 || !allowPageSizes.Contains(searchRequest.PageSize))
+            {
+                throw new NotValidDtoException(nameof(SearchRequest), $"PageNumber must be bigger than 1 or PageSize must be in [{string.Join(",", allowPageSizes)}]");
+            }
+            
+            var (products, totalCount) = await _repository.GetByCollectionIdWithParamsAsync(collectionId, searchRequest.SearchPhrace, searchRequest.PageSize, searchRequest.PageNumber, cancellationToken);
+
+            var productDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+
+            return new SearchResponse<ProductDto>(productDtos, totalCount, searchRequest.PageSize, searchRequest.PageNumber);
         }
 
         public async Task<ProductDto> GetByIdAsync(int id, CancellationToken cancellationToken)
@@ -95,7 +113,10 @@ namespace Store.Application.Services
             var validationResult = await _validator.ValidateAsync(productDto, cancellationToken);
             if (!validationResult.IsValid)
             {
-                throw new NotValidDtoException(nameof(Product), validationResult?.Errors?.ToString() ?? "Unknown Errors");
+                var allErrors = string.Join("; ", validationResult.Errors
+                                      .Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+
+                throw new NotValidDtoException(nameof(Product), allErrors);
             }
         }
     }
