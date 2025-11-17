@@ -23,6 +23,7 @@ namespace Store.Infrastructure.Extensions
             services.AddScoped<ICollectionRepository, CollectionRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
         }
     }
 }

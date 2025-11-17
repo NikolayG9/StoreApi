@@ -16,6 +16,22 @@ namespace Store.Infrastructure.Repositories
             return products;
         }
 
+        public async Task<(IEnumerable<Product>, int)> GetByCollectionIdWithParamsAsync(int collectionId, string? searchPhrase, int pageSize, int pageNumber, CancellationToken cancellationToken)
+        {
+            var searchPhraseLower = searchPhrase?.ToLower();
+
+            var baseQuery = dbContext.Products.Where(x => x.CollectionId == collectionId && searchPhrase == null || (x.Name.ToLower().Contains(searchPhraseLower)));
+
+            var totalCount = await baseQuery.CountAsync();
+
+            var products = await baseQuery
+                .Skip(pageSize * (pageNumber - 1))
+                .Take(pageSize)
+                .ToListAsync();
+            
+            return (products, totalCount);
+        }
+
         public async Task<Product> GetByIdAsync(int productId, CancellationToken cancellationToken)
         {
             var product = await dbContext.Products

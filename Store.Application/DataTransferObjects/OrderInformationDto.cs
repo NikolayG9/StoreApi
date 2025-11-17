@@ -1,9 +1,9 @@
-﻿namespace Store.Domain.Entities
+﻿namespace Store.Application.DataTransferObjects
 {
-    public class OrderInformation
+    public class OrderInformationDto
     {
         public int Id { get; set; }
-        public string FirstName {  get; set; }
+        public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Country { get; set; }
         public string City { get; set; }

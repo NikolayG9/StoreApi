@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Store.Application.Common.Models;
 using Store.Application.DataTransferObjects;
 using Store.Application.Services.Interfaces;
 using Store.Domain.Constants;
@@ -21,6 +22,13 @@ namespace Store.API.Controllers
         public async Task<IActionResult> GetByCollectionIdAsync([FromRoute]int collectionId, CancellationToken cancellationToken)
         {
             var result = await _productService.GetByCollectionIdAsync(collectionId, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("by-params")]
+        public async Task<IActionResult> GetByCollectionIdWithParams([FromRoute]int collectionId, [FromQuery] SearchRequest searchRequest, CancellationToken cancellationToken)
+        {
+            var result = await _productService.GetByCollectionIdWithParamsAsync(collectionId, searchRequest, cancellationToken);
             return Ok(result);
         }
 

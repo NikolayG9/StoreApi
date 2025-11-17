@@ -11,5 +11,10 @@
         {
             return $"{fieldName} must be under {maxLength} chars";
         }
+
+        public static string GetMustBeGreaterThanMessage(string fieldName, int minValue)
+        {
+            return $"{fieldName} must be greater than {minValue}";
+        }
     }
 }
