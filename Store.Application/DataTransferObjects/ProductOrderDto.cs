@@ -9,6 +9,7 @@
         public string SelectedColor { get; set; }
         public string SelectedSize { get; set; }
         public int ProductQuantity { get; set; }
+        public decimal Price { get; set; }
         public decimal? Discount { get; set; }
 
         public int OrderId { get; set; }

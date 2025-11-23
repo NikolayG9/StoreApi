@@ -42,6 +42,14 @@ namespace Store.API.Controllers
         }
 
         [Authorize]
+        [HttpGet("get-pdf/{orderId}")]
+        public async Task<IActionResult> GetOrderPdfFileAsync([FromRoute] int orderId, CancellationToken cancellationToken)
+        {
+            var pdfData = await _orderService.GetOrderPdfFileAsync(orderId, cancellationToken);
+            return Ok(pdfData);
+        }
+
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> AddOrderAsync([FromBody] OrderDto orderDto, CancellationToken cancellationToken)
         {
