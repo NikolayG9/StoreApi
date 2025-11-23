@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Store.Application.Common.Constants;
 using Store.Application.DataTransferObjects;
 using Store.Application.Services.Interfaces;
 using Store.Application.User.Interfaces;
@@ -13,6 +14,8 @@ namespace Store.Application.Services
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IMailService _mailService;
+        private readonly IPdfGeneratorService _pdfGeneratorService;
         private readonly IUserContext _userContext;
         private readonly IValidator<OrderDto> _validator;
         private readonly ILogger<OrderService> _logger;
@@ -20,12 +23,16 @@ namespace Store.Application.Services
 
         public OrderService(
             IOrderRepository orderRepository,
+            IMailService mailService,
+            IPdfGeneratorService pdfGeneratorService,
             IUserContext userContext,
             IValidator<OrderDto> validator,
             ILogger<OrderService> logger,
             IMapper mapper)
         {
             _orderRepository = orderRepository;
+            _mailService = mailService;
+            _pdfGeneratorService = pdfGeneratorService;
             _userContext = userContext;
             _validator = validator;
             _logger = logger;
@@ -42,7 +49,14 @@ namespace Store.Application.Services
         public async Task<OrderDto> GetOrderDetailsAsync(int orderId, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Getting Order Details By Id - {orderId}");
+            var user = _userContext.GetCurrentUser();
             var order = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId, cancellationToken);
+
+            if (user == null || user.Id != order.UserId)
+            {
+                return null;
+            }
+
             return _mapper.Map<OrderDto>(order);
         }
 
@@ -58,6 +72,21 @@ namespace Store.Application.Services
             var order = await _orderRepository.GetOrdersByClientIdAsync(currentUser.Id, cancellationToken);
 
             return _mapper.Map<IEnumerable<OrderDto>>(order);
+        }
+
+        public async Task<byte[]?> GetOrderPdfFileAsync(int orderId, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"Getting Order PDF File By Id - {orderId}");
+            var user = _userContext.GetCurrentUser();
+            var orderDetails = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId, cancellationToken);
+            
+            if (user == null || user.Id != orderDetails.UserId)
+            {
+                return null;
+            }
+
+            var orderPdf = await _pdfGeneratorService.GenerateOrderPdfFileAsync(orderId, cancellationToken);
+            return orderPdf;
         }
 
         public async Task<OrderDto> AddOrderAsync(OrderDto orderDto, CancellationToken cancellationToken)
@@ -80,9 +109,19 @@ namespace Store.Application.Services
 
             var order = _mapper.Map<Order>(orderDto);
             order.UserId = currentUser.Id;
-            order.OrderDate = DateTime.Now;
+            order.OrderDate = DateTime.UtcNow;
 
             var newOrder = await _orderRepository.CreateOrderAsync(order, cancellationToken);
+
+            var pdfData = await _pdfGeneratorService.GenerateOrderPdfFileAsync(newOrder.Id, cancellationToken);
+
+            var emailSubject = $"Order Confirmation – Elegant Bride Boutique – Order #{newOrder.Id}";
+            var emailBody = EmailMessageConstants.OrderMessageBody
+               .Replace("[Customer_Name]", $"{newOrder?.OrderInformation?.FirstName} {newOrder?.OrderInformation?.LastName}")
+               .Replace("[Order_Number]", newOrder?.Id.ToString());
+
+            await _mailService.SendEmailAsync("lolita.culiuc19@gmail.com", emailSubject, emailBody, pdfData, cancellationToken);
+           
             return _mapper.Map<OrderDto>(newOrder);
         }
 

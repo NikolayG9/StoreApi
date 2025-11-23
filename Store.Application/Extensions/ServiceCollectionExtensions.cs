@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using QuestPDF.Infrastructure;
 using Store.Application.Services;
 using Store.Application.Services.Interfaces;
 using Store.Application.User;
@@ -18,12 +19,16 @@ namespace Store.Application.Extensions
             services.AddScoped<IUserContext, UserContext>();
             services.AddHttpContextAccessor();
 
+            QuestPDF.Settings.License = LicenseType.Community;
+
             // Services
             services.AddScoped<ICollectionService, CollectionService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IMailService, MailService>();
+            services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
 
             // Validators
             services.AddValidatorsFromAssemblyContaining(typeof(CollectionDtoValidator));

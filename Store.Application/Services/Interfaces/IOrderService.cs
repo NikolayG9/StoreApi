@@ -7,6 +7,7 @@ namespace Store.Application.Services.Interfaces
         Task<IEnumerable<OrderDto>> GetAllOrdersAsync(CancellationToken cancellationToken);
         Task<IEnumerable<OrderDto>> GetOrdersByClientId(CancellationToken cancellationToken);
         Task<OrderDto> GetOrderDetailsAsync(int orderId, CancellationToken cancellationToken);
+        Task<byte[]?> GetOrderPdfFileAsync(int orderId, CancellationToken cancellationToken);
         Task<OrderDto> AddOrderAsync(OrderDto orderDto, CancellationToken cancellationToken);
         Task<OrderDto> UpdateOrderAsync(OrderDto orderDto, CancellationToken cancellationToken);
         Task<bool> DeleteOrderAsync(int orderId, CancellationToken cancellationToken);
