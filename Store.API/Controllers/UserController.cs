@@ -21,5 +21,19 @@ namespace Store.API.Controllers
             var newUser = await _userService.RegisterUserAsync(userDto, cancellationToken);
             return Ok(newUser);
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordDto forgotPasswordDto, CancellationToken cancellationToken)
+        {
+            await _userService.ForgotPasswordAsync(forgotPasswordDto, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordDto resetPasswordDto, CancellationToken cancellationToken)
+        {
+            await _userService.ResetPasswordAsync(resetPasswordDto, cancellationToken);
+            return NoContent();
+        }
     }
 }
