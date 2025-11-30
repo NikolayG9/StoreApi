@@ -69,7 +69,23 @@ namespace Store.API.Controllers
         [HttpDelete("{orderId}")]
         public async Task<IActionResult> DeleteOrderAsync([FromRoute] int orderId, CancellationToken cancellationToken)
         {
-            var result = await _orderService.DeleteOrderAsync(orderId, cancellationToken);
+            await _orderService.DeleteOrderAsync(orderId, cancellationToken);
+            return NoContent();
+        }
+
+        [Authorize(Roles = UserRole.Admin)]
+        [HttpGet("soft-delete/get-all")]
+        public async Task<IActionResult> GetAllSoftDeletedOrdersAsync(CancellationToken cancellationToken)
+        {
+            var result = await _orderService.GetAllSoftDeletedOrdersAsync(cancellationToken);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = UserRole.Admin)]
+        [HttpGet("soft-delete/{orderId}")]
+        public async Task<IActionResult> GetSoftDeleteOrderInformationAsync([FromRoute] int orderId, CancellationToken cancellationToken)
+        {
+            var result = await _orderService.GetSoftDeletedOrderInformationByIdAsync(orderId, cancellationToken);
             return Ok(result);
         }
 
@@ -77,7 +93,15 @@ namespace Store.API.Controllers
         [HttpDelete("soft-delete/{orderId}")]
         public async Task<IActionResult> SoftDeleteOrderAsync([FromRoute] int orderId, CancellationToken cancellationToken)
         {
-            var result = await _orderService.SoftDeleteOrderAsync(orderId, cancellationToken);
+            await _orderService.SoftDeleteOrderAsync(orderId, cancellationToken);
+            return NoContent();
+        }
+
+        [Authorize(Roles = UserRole.Admin)]
+        [HttpPut("soft-delete-cancel/{orderId}")]
+        public async Task<IActionResult> CancelSoftDeleteOrderAsync([FromRoute] int orderId, CancellationToken cancellationToken)
+        {
+            var result = await _orderService.CancelSoftDeletedOrderById(orderId, cancellationToken);
             return Ok(result);
         }
     }

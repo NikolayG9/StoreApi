@@ -59,8 +59,8 @@ namespace Store.API.Controllers
         [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> DeleteProductAsync([FromRoute]int productId, CancellationToken cancellationToken)
         {
-            var result = await _productService.DeleteAsync(productId, cancellationToken);
-            return Ok(result);
+            await _productService.DeleteAsync(productId, cancellationToken);
+            return NoContent();
         }
     }
 }

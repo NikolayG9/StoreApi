@@ -8,6 +8,6 @@ namespace Store.Application.Services.Interfaces
         Task<CollectionDto> GetByIdAsync(int id, CancellationToken cancellationToken);
         Task<CollectionDto> CreateAsync(CollectionDto collectionDto, CancellationToken cancellationToken);
         Task<CollectionDto> UpdateAsync(CollectionDto collectionDto, CancellationToken cancellationToken);
-        Task<bool> DeleteAsync(int collectionId, CancellationToken cancellationToken);
+        Task DeleteAsync(int collectionId, CancellationToken cancellationToken);
     }
 }

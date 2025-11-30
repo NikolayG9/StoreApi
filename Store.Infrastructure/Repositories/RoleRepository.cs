@@ -18,6 +18,11 @@ namespace Store.Infrastructure.Repositories
             return await dbContext.Roles.FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<bool> IsAnyRoleByIdAsync(string id, CancellationToken cancellationToken)
+        {
+            return await dbContext.Roles.AnyAsync(x => x.Id == id);
+        }
+
         public async Task<IdentityRole> AddRoleAsync(IdentityRole role, CancellationToken cancellationToken)
         {
             await dbContext.Roles.AddAsync(role, cancellationToken);
