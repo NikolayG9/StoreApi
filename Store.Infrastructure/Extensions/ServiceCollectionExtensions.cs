@@ -6,6 +6,7 @@ using Store.Domain.Entities;
 using Store.Domain.Repositories;
 using Store.Infrastructure.Persistence;
 using Store.Infrastructure.Repositories;
+using Store.Infrastructure.Seeders;
 
 namespace Store.Infrastructure.Extensions
 {
@@ -20,6 +21,7 @@ namespace Store.Infrastructure.Extensions
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<StoreDbContext>();
 
+            services.AddScoped<IStoreSeeder, StoreSeeder>();
             services.AddScoped<ICollectionRepository, CollectionRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
