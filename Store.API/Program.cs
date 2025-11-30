@@ -4,31 +4,50 @@ using Store.Application.Extensions;
 using Store.Application.Options;
 using Store.Domain.Entities;
 using Store.Infrastructure.Extensions;
+using Serilog;
+using Store.Infrastructure.Seeders;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.AddPresentation();
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.Configure<GmailOptions>(builder.Configuration.GetSection(GmailOptions.GmailOptionsKey));
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.UseMiddleware<ErrorHandlingMiddleware>();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.AddPresentation();
+    builder.Services.AddApplication();
+    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.Configure<GmailOptions>(builder.Configuration.GetSection(GmailOptions.GmailOptionsKey));
+
+    var app = builder.Build();
+
+
+    var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<IStoreSeeder>();
+
+    await seeder.Seed();
+
+    // Configure the HTTP request pipeline.
+    app.UseMiddleware<ErrorHandlingMiddleware>();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.MapGroup("api/identity").MapIdentityApi<User>();
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.MapGroup("api/identity").MapIdentityApi<User>();
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application startup failed");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
