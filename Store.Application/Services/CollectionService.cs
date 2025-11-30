@@ -77,7 +77,7 @@ namespace Store.Application.Services
             return _mapper.Map<CollectionDto>(updatedCollection);
         }
 
-        public async Task<bool> DeleteAsync(int collectionId, CancellationToken cancellationToken)
+        public async Task DeleteAsync(int collectionId, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Deleting Collection With Id = {collectionId}");
             var isCollectionExists = await _collectionRepository.GetByIdAsync(collectionId, cancellationToken);
@@ -87,8 +87,6 @@ namespace Store.Application.Services
             }
 
             await _collectionRepository.DeleteAsync(new Collection { Id = collectionId }, cancellationToken);
-
-            return true;
         }
 
         private async Task CheckCollectionDtoValidation(CollectionDto collectionDto, CancellationToken cancellationToken)

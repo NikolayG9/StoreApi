@@ -6,6 +6,7 @@ namespace Store.Domain.Repositories
     {
         Task<IEnumerable<IdentityRole>> GetRolesAsync(CancellationToken cancellationToken);
         Task<IdentityRole?> GetRoleByIdAsync(string roleId, CancellationToken cancellationToken);
+        Task<bool> IsAnyRoleByIdAsync(string roleId, CancellationToken cancellationToken);
         Task<IdentityRole> AddRoleAsync(IdentityRole role, CancellationToken cancellationToken);
         Task<IdentityRole> UpdateRoleAsync(IdentityRole role, CancellationToken cancellationToken);
         Task DeleteRoleAsync(IdentityRole role, CancellationToken cancellationToken);

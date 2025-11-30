@@ -70,8 +70,23 @@ namespace Store.Application.Services
             _logger.LogInformation($"Getting Orders By Client Id - {currentUser.Id}");
 
             var order = await _orderRepository.GetOrdersByClientIdAsync(currentUser.Id, cancellationToken);
-
             return _mapper.Map<IEnumerable<OrderDto>>(order);
+        }
+
+        public async Task<IEnumerable<OrderDto>> GetAllSoftDeletedOrdersAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Getting All Soft Deleted Orders");
+
+            var softDeletedOrders = await _orderRepository.GetAllSoftDeletedOrdersAsync(cancellationToken);
+            return _mapper.Map<IEnumerable<OrderDto>>(softDeletedOrders);
+        }
+
+        public async Task<OrderDto> GetSoftDeletedOrderInformationByIdAsync(int orderId, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Getting Soft Deleted Order Information");
+
+            var softDeletedOrder = await _orderRepository.GetSoftDeletedOrderInformationByIdAsync(orderId, cancellationToken);
+            return _mapper.Map<OrderDto>(softDeletedOrder);
         }
 
         public async Task<byte[]?> GetOrderPdfFileAsync(int orderId, CancellationToken cancellationToken)
@@ -137,15 +152,15 @@ namespace Store.Application.Services
                 throw new NotValidDtoException(nameof(OrderDto), allErrors);
             }
 
+            if (await _orderRepository.IsAnyOrderByIdAsync(orderDto.Id, cancellationToken))
+            {
+                throw new NotFoundException(nameof(Order), orderDto.Id.ToString());
+            }
+
             var currentUser = _userContext.GetCurrentUser();
             if (currentUser == null)
             {
-                throw new UnauthorizedAccessException("");
-            }
-
-            if (currentUser.Id != orderDto.UserId)
-            {
-                throw new Exception("Client Ids don't correspond");
+                throw new UnauthorizedAccessException("User is unauthorized");
             }
 
             var order = _mapper.Map<Order>(orderDto);
@@ -154,7 +169,21 @@ namespace Store.Application.Services
             return _mapper.Map<OrderDto>(newOrder);
         }
 
-        public async Task<bool> DeleteOrderAsync(int orderId, CancellationToken cancellationToken)
+        public async Task<OrderDto> CancelSoftDeletedOrderById(int orderId, CancellationToken cancellationToken)
+        {
+            var order = await _orderRepository.GetSoftDeletedOrderInformationByIdAsync(orderId, cancellationToken);
+            if (order == null)
+            {
+                throw new NotFoundException(nameof(Order), orderId.ToString());
+            }
+
+            order.IsSoftDeleted = true;
+            await _orderRepository.UpdateOrderAsync(order, cancellationToken);
+
+            return _mapper.Map<OrderDto>(order);
+        }
+
+        public async Task DeleteOrderAsync(int orderId, CancellationToken cancellationToken)
         {
             var order = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId, cancellationToken);
             if (order == null)
@@ -163,10 +192,9 @@ namespace Store.Application.Services
             }
 
             await _orderRepository.DeleteOrderAsync(order, cancellationToken);
-            return true;
         }
 
-        public async Task<bool> SoftDeleteOrderAsync(int orderId, CancellationToken cancellationToken)
+        public async Task SoftDeleteOrderAsync(int orderId, CancellationToken cancellationToken)
         {
             var order = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId, cancellationToken);
             if (order == null)
@@ -175,7 +203,6 @@ namespace Store.Application.Services
             }
 
             await _orderRepository.SoftDeleteOrderAsync(order, cancellationToken);
-            return true;
         }
     }
 }

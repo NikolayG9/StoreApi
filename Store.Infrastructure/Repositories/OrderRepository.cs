@@ -9,13 +9,17 @@ namespace Store.Infrastructure.Repositories
     {
         public async Task<IEnumerable<Order>> GetAllOrdersAsync(CancellationToken cancellationToken)
         {
-            var orders = await dbContext.Orders.Include(x => x.OrderInformation).ToListAsync();
+            var orders = await dbContext.Orders.Where(x => x.IsSoftDeleted == false).Include(x => x.OrderInformation).ToListAsync();
             return orders;
         }
 
         public async Task<IEnumerable<Order>> GetOrdersByClientIdAsync(string clientId, CancellationToken cancellationToken)
         {
-            var orders = await dbContext.Orders.Include(x => x.OrderInformation).Where(x => x.UserId == clientId).ToListAsync();
+            var orders = await dbContext.Orders
+                .Include(x => x.OrderInformation)
+                .Where(x => x.UserId == clientId && x.IsSoftDeleted == false)
+                .ToListAsync();
+
             return orders;
         }
 
@@ -24,9 +28,29 @@ namespace Store.Infrastructure.Repositories
             var orderDetails = await dbContext.Orders
                                               .Include(x => x.OrderInformation)
                                               .Include(x => x.OrderedProducts)
-                                              .FirstOrDefaultAsync(x => x.Id == orderId);
+                                              .FirstOrDefaultAsync(x => x.Id == orderId && x.IsSoftDeleted == false);
 
             return orderDetails;
+        }
+
+        public async Task<IEnumerable<Order>> GetAllSoftDeletedOrdersAsync(CancellationToken cancellationToken)
+        {
+            var orders = await dbContext.Orders.Where(x => x.IsSoftDeleted == true).Include(x => x.OrderInformation).ToListAsync();
+            return orders;
+        }
+
+        public async Task<Order> GetSoftDeletedOrderInformationByIdAsync(int orderId, CancellationToken cancellationToken)
+        {
+            var orderDetails = await dbContext.Orders
+                                    .Include(x => x.OrderInformation)
+                                    .Include(x => x.OrderedProducts)
+                                    .FirstOrDefaultAsync(x => x.Id == orderId && x.IsSoftDeleted == true);
+            return orderDetails;
+        }
+
+        public async Task<bool> IsAnyOrderByIdAsync(int orderId, CancellationToken cancellationToken)
+        {
+            return await dbContext.Orders.AnyAsync(x => x.Id == orderId, cancellationToken);
         }
 
         public async Task<Order> CreateOrderAsync(Order order, CancellationToken cancellationToken)

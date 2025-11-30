@@ -44,6 +44,12 @@ namespace Store.Application.Services
         public async Task<RoleDto> UpdateRoleAsync(RoleDto roleDto, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Update Role - {roleDto.Name}");
+            
+            if (await _roleRepository.IsAnyRoleByIdAsync(roleDto.Id, cancellationToken))
+            {
+                throw new NotFoundException(nameof(RoleDto), roleDto.Id);
+            }
+
             var role = _mapper.Map<IdentityRole>(roleDto);
             var updatedRole = await _roleRepository.UpdateRoleAsync(role, cancellationToken);
 

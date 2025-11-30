@@ -95,7 +95,7 @@ namespace Store.Application.Services
             return _mapper.Map<ProductDto>(updatedProduct);
         }
 
-        public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
             var isProductExist = await _repository.GetByIdAsync(id, cancellationToken);
             if (isProductExist == null)
@@ -104,8 +104,6 @@ namespace Store.Application.Services
             }
 
             await _repository.DeleteAsync(new Product { Id = id }, cancellationToken);
-            
-            return true;
         }
 
         private async Task CheckProductDtoValidation(ProductDto productDto, CancellationToken cancellationToken)

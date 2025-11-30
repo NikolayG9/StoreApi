@@ -51,8 +51,8 @@ namespace Store.API.Controllers
         [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> DeleteCollectionAsync([FromRoute]int id, CancellationToken cancellationToken)
         {
-            var isCollectionDeleted = await _collectionService.DeleteAsync(id, cancellationToken);
-            return Ok(isCollectionDeleted);
+            await _collectionService.DeleteAsync(id, cancellationToken);
+            return NoContent();
         }
     }
 }

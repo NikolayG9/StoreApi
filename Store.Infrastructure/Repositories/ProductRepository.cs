@@ -32,6 +32,16 @@ namespace Store.Infrastructure.Repositories
             return (products, totalCount);
         }
 
+        public async Task<IEnumerable<Product>> GetSoftDeletedProductsByCollectionIdAsync(int collectionId, CancellationToken cancellationToken)
+        {
+            var products = await dbContext.Products
+                        .Where(x => x.CollectionId == collectionId)
+                        .Include(y => y.Images.Where(i => i.IsMain == true))
+                        .ToListAsync();
+            
+            return products;
+        }
+
         public async Task<Product> GetByIdAsync(int productId, CancellationToken cancellationToken)
         {
             var product = await dbContext.Products
