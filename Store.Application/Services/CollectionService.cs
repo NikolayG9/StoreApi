@@ -63,11 +63,6 @@ namespace Store.Application.Services
         public async Task<CollectionDto> UpdateAsync(CollectionDto collectionDto, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Updating Collection With Id = {collectionDto.Id}");
-            var isCollectionExists = await _collectionRepository.GetByIdAsync(collectionDto.Id, cancellationToken);
-            if (isCollectionExists == null)
-            {
-                throw new NotFoundException(nameof(Collection), collectionDto.Id.ToString());
-            }
 
             await CheckCollectionDtoValidation(collectionDto, cancellationToken);
 

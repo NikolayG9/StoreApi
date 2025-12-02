@@ -47,7 +47,7 @@ namespace Store.API.Controllers
             return Ok(updatedCollection);
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}   ")]
         [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> DeleteCollectionAsync([FromRoute]int id, CancellationToken cancellationToken)
         {

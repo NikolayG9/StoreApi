@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using Serilog;
 using Store.API.Middlewares;
 
 namespace Store.API.Extensions
@@ -36,7 +37,11 @@ namespace Store.API.Extensions
             });
 
             builder.Services.AddScoped<ErrorHandlingMiddleware>();
+            builder.Services.AddScoped<RequestTimeLoggingMiddleware>();
 
+            builder.Host.UseSerilog((context, configuration) =>
+                configuration.ReadFrom.Configuration(context.Configuration)
+            );
         }
     }
 }
