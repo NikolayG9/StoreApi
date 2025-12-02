@@ -82,7 +82,7 @@ namespace Store.Application.Services
         {
             _logger.LogInformation($"Updating Product With Id = {productDto.Id}");
             var isProductExist = await _repository.GetByIdAsync(productDto.Id, cancellationToken);
-            if (isProductExist == null)
+            if (await _repository.IsAnyCollectionByIdAsync(productDto.Id, cancellationToken) == false)
             {
                 throw new NotFoundException(nameof(Product),  productDto.Id.ToString());
             }
@@ -97,8 +97,7 @@ namespace Store.Application.Services
 
         public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            var isProductExist = await _repository.GetByIdAsync(id, cancellationToken);
-            if (isProductExist == null)
+            if (await _repository.IsAnyCollectionByIdAsync(id, cancellationToken) == false)
             {
                 throw new NotFoundException(nameof(Product), id.ToString());
             }

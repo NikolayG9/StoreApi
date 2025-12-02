@@ -135,7 +135,7 @@ namespace Store.Application.Services
                .Replace("[Customer_Name]", $"{newOrder?.OrderInformation?.FirstName} {newOrder?.OrderInformation?.LastName}")
                .Replace("[Order_Number]", newOrder?.Id.ToString());
 
-            await _mailService.SendEmailAsync("lolita.culiuc19@gmail.com", emailSubject, emailBody, pdfData, cancellationToken);
+            //await _mailService.SendEmailAsync("lolita.culiuc19@gmail.com", emailSubject, emailBody, pdfData, cancellationToken);
            
             return _mapper.Map<OrderDto>(newOrder);
         }

@@ -52,6 +52,11 @@ namespace Store.Infrastructure.Repositories
             return product;
         }
 
+        public async Task<bool> IsAnyCollectionByIdAsync(int collectionId, CancellationToken cancellationToken)
+        {
+            return await dbContext.Products.AnyAsync(x => x.CollectionId == collectionId, cancellationToken);
+        }
+
         public async Task<Product> CreateAsync(Product product, CancellationToken cancellationToken)
         {
             product.CreatedAt = DateTime.UtcNow;
