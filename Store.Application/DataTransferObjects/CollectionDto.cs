@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace Store.Application.DataTransferObjects
+﻿namespace Store.Application.DataTransferObjects
 {
     public class CollectionDto
     {
@@ -9,6 +7,5 @@ namespace Store.Application.DataTransferObjects
         public string? ImageUrl { get; set; }
         public string? ImageAltText { get; set; }
         public DateTime CreatedAt { get; set; }
-        public IFormFile? File { get; set; }
     }
 }

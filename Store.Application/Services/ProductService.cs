@@ -15,20 +15,17 @@ namespace Store.Application.Services
         private int[] allowPageSizes = [5, 10, 15, 30];
 
         private readonly IProductRepository _repository;
-        private readonly IBlobStorageService _blobStorageService;
         private readonly ILogger<ProductService> _logger;
         private readonly IValidator<ProductDto> _validator;
         private readonly IMapper _mapper;
 
         public ProductService(
             IProductRepository repository,
-            IBlobStorageService blobStorageService,
             ILogger<ProductService> logger,
             IValidator<ProductDto> validator,
             IMapper mapper)
         {
             _repository = repository;
-            _blobStorageService = blobStorageService;
             _logger = logger;
             _validator = validator;
             _mapper = mapper;
@@ -76,13 +73,7 @@ namespace Store.Application.Services
             await CheckProductDtoValidation(productDto, cancellationToken);
 
             var product = _mapper.Map<Product>(productDto);
-
-            if (product.Images != null && product.Images.Any())
-            {
-                product.Images.Clear();
-            }
-
-            var createdProduct = await _repository.AddProductAsync(product, cancellationToken);
+            var createdProduct = await _repository.CreateAsync(product, cancellationToken);
 
             return _mapper.Map<ProductDto>(createdProduct);
         }
@@ -91,7 +82,7 @@ namespace Store.Application.Services
         {
             _logger.LogInformation($"Updating Product With Id = {productDto.Id}");
             var isProductExist = await _repository.GetByIdAsync(productDto.Id, cancellationToken);
-            if (await _repository.IsAnyProductByIdAsync(productDto.Id, cancellationToken) == false)
+            if (await _repository.IsAnyCollectionByIdAsync(productDto.Id, cancellationToken) == false)
             {
                 throw new NotFoundException(nameof(Product),  productDto.Id.ToString());
             }
@@ -100,62 +91,18 @@ namespace Store.Application.Services
 
             var product = _mapper.Map<Product>(productDto);
 
-            var updatedProduct = await _repository.UpdateProductAsync(product, cancellationToken);
+            var updatedProduct = await _repository.UpdateAsync(product, cancellationToken);
             return _mapper.Map<ProductDto>(updatedProduct);
         }
 
         public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            if (await _repository.IsAnyProductByIdAsync(id, cancellationToken) == false)
+            if (await _repository.IsAnyCollectionByIdAsync(id, cancellationToken) == false)
             {
                 throw new NotFoundException(nameof(Product), id.ToString());
             }
 
-            await _repository.DeleteProductAsync(new Product { Id = id }, cancellationToken);
-        }
-
-        public async Task HandleImagesAsync(int productId, List<ImageFileDto> images, CancellationToken cancellationToken)
-        {
-            if (images == null || !images.Any())
-            {
-                return;
-            }
-
-            if (await _repository.IsAnyProductByIdAsync(productId, cancellationToken) == false)
-            {
-                throw new NotFoundException(nameof(Product), productId.ToString());
-            }
-
-            foreach (var imageDto in images)
-            {
-                if (imageDto.IsNew)
-                {
-                    var imageUrl = string.Empty;
-                    if (imageDto.File != null)
-                    {
-                        using var stream = imageDto.File.OpenReadStream();
-                        imageUrl = await _blobStorageService.UploadProductImageToBlobStorageAsync(imageDto.File.FileName, stream, cancellationToken);
-                    }
-
-                    var image = _mapper.Map<Image>(imageDto);
-                    image.ProductId = productId;
-                    image.ImageUrl = imageUrl;
-
-                    await _repository.AddProductImageAsync(image, cancellationToken);
-                }
-                if (imageDto.IsDeleted)
-                {
-                    if (!string.IsNullOrEmpty(imageDto.ImageUrl))
-                    {
-                        await _blobStorageService.DeleteProductImageFromBlobStorageAsync(imageDto.ImageUrl, cancellationToken);
-                    }
-
-                    var image = _mapper.Map<Image>(imageDto);
-                    image.ProductId = productId;
-
-                    await _repository.DeleteProductImageAsync(image, cancellationToken);
-                }
-            }
+            await _repository.DeleteAsync(new Product { Id = id }, cancellationToken);
         }
 
         private async Task CheckProductDtoValidation(ProductDto productDto, CancellationToken cancellationToken)

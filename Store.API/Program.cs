@@ -14,9 +14,7 @@ try
     builder.AddPresentation();
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
-    
     builder.Services.Configure<GmailOptions>(builder.Configuration.GetSection(GmailOptions.GmailOptionsKey));
-    builder.Services.Configure<BlobStorageOptions>(builder.Configuration.GetSection(BlobStorageOptions.BlobStorageOptionsKey));
 
     var app = builder.Build();
 

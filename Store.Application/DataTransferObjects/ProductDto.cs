@@ -11,7 +11,7 @@
         public DateTime CreatedAt { get; set; }
         public int CollectionId { get; set; }
 
-        public List<ImageDto>? Images { get; set; }
+        public List<ImageDto> Images { get; set; }
         public List<ColorDto> Colors { get; set; }
     }
 }

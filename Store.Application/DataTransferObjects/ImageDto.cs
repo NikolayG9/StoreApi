@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace Store.Application.DataTransferObjects
+﻿namespace Store.Application.DataTransferObjects
 {
     public class ImageDto
     {
@@ -8,7 +6,5 @@ namespace Store.Application.DataTransferObjects
         public string? ImageUrl { get; set; }
         public string? AltText { get; set; }
         public bool IsMain { get; set; }
-        public bool IsNew { get; set; }
-        public bool IsDeleted { get; set; }
     }
 }

@@ -42,7 +42,7 @@ namespace Store.Infrastructure.Repositories
             return products;
         }
 
-        public async Task<Product?> GetByIdAsync(int productId, CancellationToken cancellationToken)
+        public async Task<Product> GetByIdAsync(int productId, CancellationToken cancellationToken)
         {
             var product = await dbContext.Products
                                          .Include(x => x.Images)
@@ -52,12 +52,12 @@ namespace Store.Infrastructure.Repositories
             return product;
         }
 
-        public async Task<bool> IsAnyProductByIdAsync(int productId, CancellationToken cancellationToken)
+        public async Task<bool> IsAnyCollectionByIdAsync(int collectionId, CancellationToken cancellationToken)
         {
-            return await dbContext.Products.AnyAsync(x => x.Id == productId, cancellationToken);
+            return await dbContext.Products.AnyAsync(x => x.CollectionId == collectionId, cancellationToken);
         }
 
-        public async Task<Product> AddProductAsync(Product product, CancellationToken cancellationToken)
+        public async Task<Product> CreateAsync(Product product, CancellationToken cancellationToken)
         {
             product.CreatedAt = DateTime.UtcNow;
 
@@ -67,13 +67,7 @@ namespace Store.Infrastructure.Repositories
             return product;
         }
 
-        public async Task AddProductImageAsync(Image image, CancellationToken cancellationToken)
-        {
-            await dbContext.Images.AddAsync(image, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task<Product> UpdateProductAsync(Product product, CancellationToken cancellationToken)
+        public async Task<Product> UpdateAsync(Product product, CancellationToken cancellationToken)
         {
             var existingProduct = await dbContext.Products
                                                  .Include(x => x.Images)
@@ -87,6 +81,36 @@ namespace Store.Infrastructure.Repositories
             existingProduct.Price = product.Price;
             existingProduct.Discount = product.Discount;
             existingProduct.CollectionId = product.CollectionId;
+
+            
+            // Handle Images
+            var existingImages = existingProduct.Images.ToList();
+            
+            // Remove deleted images
+            foreach(var existingImage in existingImages)
+            {
+                if (!product.Images.Any(x => x.Id == existingImage.Id))
+                {
+                    dbContext.Images.Remove(existingImage);
+                }
+            }
+
+            // Add or Update Images
+            foreach (var image in product.Images)
+            {
+                var existingImage = existingImages.FirstOrDefault(x => x.Id == image.Id);
+                if (existingImage == null)
+                {
+                    image.ProductId = existingProduct.Id;
+                    existingProduct.Images.Add(image);
+                }
+                else
+                {
+                    existingImage.ImageUrl = image.ImageUrl;
+                    existingImage.AltText = image.AltText;
+                    existingImage.IsMain = image.IsMain;
+                }
+            }
 
             // Handle Colors
             var existingColors = existingProduct.Colors.ToList();
@@ -121,16 +145,10 @@ namespace Store.Infrastructure.Repositories
             return existingProduct;
         }
 
-        public async Task DeleteProductAsync(Product product, CancellationToken cancellationToken)
+        public async Task DeleteAsync(Product product, CancellationToken cancellationToken)
         {
             dbContext.Remove(product);
             await dbContext.SaveChangesAsync();
-        }
-
-        public async Task DeleteProductImageAsync(Image image, CancellationToken cancellationToken)
-        {
-            dbContext.Remove(image);
-            await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }
