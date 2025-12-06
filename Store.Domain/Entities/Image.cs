@@ -7,5 +7,7 @@
         public string? AltText {  get; set; }
         public bool IsMain { get; set; }
         public int ProductId { get; set; }
+        public bool IsNew { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

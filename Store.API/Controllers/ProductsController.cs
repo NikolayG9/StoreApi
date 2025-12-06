@@ -47,6 +47,14 @@ namespace Store.API.Controllers
             return Ok(result);
         }
 
+        [HttpPost("{productId}/upload-images")]
+        [Authorize(Roles = UserRole.Admin)]
+        public async Task<IActionResult> HandleImagesAsync([FromRoute] int productId, [FromForm] List<ImageFileDto> images, CancellationToken cancellationToken)
+        {
+            await _productService.HandleImagesAsync(productId, images, cancellationToken);
+            return NoContent();
+        }
+
         [HttpPut("{productId}")]
         [Authorize(Roles = UserRole.Admin)]
         public async Task<IActionResult> UpdateProductAsync([FromBody]ProductDto productDto, CancellationToken cancellationToken)

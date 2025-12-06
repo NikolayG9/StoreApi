@@ -2,13 +2,13 @@
 
 namespace Store.Application.DataTransferObjects
 {
-    public class ImageDto
+    public class ImageFileDto
     {
-        public int Id { get; set; }
-        public string? ImageUrl { get; set; }
         public string? AltText { get; set; }
+        public string? ImageUrl { get; set; }
         public bool IsMain { get; set; }
         public bool IsNew { get; set; }
         public bool IsDeleted { get; set; }
+        public IFormFile? File { get; set; }
     }
 }

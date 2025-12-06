@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuestPDF.Infrastructure;
+using Store.Application.Options;
 using Store.Application.Services;
 using Store.Application.Services.Interfaces;
 using Store.Application.User;
@@ -29,6 +31,7 @@ namespace Store.Application.Extensions
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IMailService, MailService>();
             services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
+            services.AddScoped<IBlobStorageService, BlobStorageService>();
 
             // Validators
             services.AddValidatorsFromAssemblyContaining(typeof(CollectionDtoValidator));

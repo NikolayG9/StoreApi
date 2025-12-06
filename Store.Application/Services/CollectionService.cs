@@ -12,17 +12,20 @@ namespace Store.Application.Services
     public class CollectionService : ICollectionService
     {
         private readonly ICollectionRepository _collectionRepository;
+        private readonly IBlobStorageService _blobStorageService;
         private readonly ILogger<CollectionService> _logger;
         private readonly IValidator<CollectionDto> _validator;
         private readonly IMapper _mapper;
 
         public CollectionService(
             ICollectionRepository collectionRepository,
+            IBlobStorageService blobStorageService,
             ILogger<CollectionService> logger,
             IValidator<CollectionDto> validator,
             IMapper mapper)
         {
             _collectionRepository = collectionRepository;
+            _blobStorageService = blobStorageService;
             _validator = validator;
             _logger = logger;
             _mapper = mapper;
@@ -56,6 +59,14 @@ namespace Store.Application.Services
 
             var collection = _mapper.Map<Collection>(collectionDto);
 
+            if (collectionDto.File != null)
+            {
+                using var stream = collectionDto.File.OpenReadStream();
+                var imageUrl = await _blobStorageService.UploadCollectionImageToBlobStorageAsync(collectionDto.File.FileName, stream, cancellationToken);
+
+                collection.ImageUrl = imageUrl;
+            }
+
             var createdCollection = await _collectionRepository.CreateAsync(collection, cancellationToken);
             return _mapper.Map<CollectionDto>(createdCollection);
         }
@@ -68,6 +79,19 @@ namespace Store.Application.Services
 
             var collection = _mapper.Map<Collection>(collectionDto);
 
+            if (collectionDto.File != null) 
+            {
+                using var stream = collectionDto.File.OpenReadStream();
+
+                if (!string.IsNullOrEmpty(collectionDto.ImageUrl))
+                {
+                    await _blobStorageService.DeleteCollectionImageFromBlobStorageAsync(collectionDto.ImageUrl, cancellationToken);
+                }
+
+                var imageUrl = await _blobStorageService.UploadCollectionImageToBlobStorageAsync(collectionDto.File.FileName, stream, cancellationToken);
+                collection.ImageUrl = imageUrl;
+            }
+
             var updatedCollection = await _collectionRepository.UpdateAsync(collection, cancellationToken);
             return _mapper.Map<CollectionDto>(updatedCollection);
         }
@@ -75,13 +99,18 @@ namespace Store.Application.Services
         public async Task DeleteAsync(int collectionId, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Deleting Collection With Id = {collectionId}");
-            var isCollectionExists = await _collectionRepository.GetByIdAsync(collectionId, cancellationToken);
-            if (isCollectionExists == null)
+            var collection = await _collectionRepository.GetByIdAsync(collectionId, cancellationToken);
+            if (collection == null)
             {
                 throw new NotFoundException(nameof(Collection), collectionId.ToString());
             }
 
-            await _collectionRepository.DeleteAsync(new Collection { Id = collectionId }, cancellationToken);
+            if (!string.IsNullOrEmpty(collection.ImageUrl))
+            {
+                await _blobStorageService.DeleteCollectionImageFromBlobStorageAsync(collection.ImageUrl, cancellationToken);
+            }
+
+            await _collectionRepository.DeleteAsync(collection, cancellationToken);
         }
 
         private async Task CheckCollectionDtoValidation(CollectionDto collectionDto, CancellationToken cancellationToken)
