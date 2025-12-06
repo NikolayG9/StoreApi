@@ -1,12 +1,11 @@
-name: store-api
+name: store-api-ci
 
 on:
-  push:
-    branches: [master]
   pull_request:
-    branches:
+    branches: 
     - master
   workflow_dispatch:
+
 
 jobs:
   build:
@@ -20,7 +19,5 @@ jobs:
           dotnet-version: 8.0.x
       - name: Restore dependencies
         run: dotnet restore
-      - name: Build
+      - name:  Build
         run: dotnet build --no-restore
-      
-    
