@@ -19,7 +19,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name:  Build
-        run: dotnet build --no-restore
+        run: dotnet build --no-restore -c Release
       - name: Publish
         run: dotnet publish .src/Store.API/Store.API.csproj -o {{env.DOTNET_ROOT}}/api --no-build
       - name: Upload a Build Artifact
@@ -33,7 +33,7 @@ jobs:
     needs: build
     steps:
       - name: Download a Build Artifact
-        uses: actions/download-artifacts@v4.3.1
+        uses: actions/download-artifact@v4.3.1
         with:
           name: api-artifact
       - name: Azure WebApp
