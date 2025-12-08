@@ -40,4 +40,4 @@ jobs:
         uses: Azure/webapps-deploy@v3.0.0
         with:
           app-name: 'wed-store-api-dev'
-          publish-profile: ${{secrets.PUBLISH_PROFILE_DEV}}
+          publish-profile: ${{ secrets.PUBLISH_PROFILE_DEV }}
