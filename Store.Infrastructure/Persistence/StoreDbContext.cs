@@ -15,6 +15,7 @@ namespace Store.Infrastructure.Persistence
         internal DbSet<Order> Orders { get; set; }
         internal DbSet<OrderInformation> OrdersInformation { get; set; }
         internal DbSet<ProductOrder> OrderedProducts { get; set; }
+        internal DbSet<UserMessage> UserMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +28,7 @@ namespace Store.Infrastructure.Persistence
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrderInformation).Assembly);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductConfiguration).Assembly);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductOrderConfiguration).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(UserMessageConfiguration).Assembly);
         }
     }
 }

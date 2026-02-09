@@ -29,6 +29,7 @@ namespace Store.Application.Extensions
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IMailService, MailService>();
             services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
+            services.AddScoped<IUserMessageService, UserMessageService>();
 
             // Validators
             services.AddValidatorsFromAssemblyContaining(typeof(CollectionDtoValidator));

@@ -38,6 +38,13 @@ try
 
     app.MapGroup("api/identity").MapIdentityApi<User>();
 
+    app.UseCors(x => x
+       .WithOrigins("http://localhost:4200", "https://localhost:4200")
+       .AllowAnyHeader()
+       .AllowAnyMethod()
+       .AllowCredentials());
+
+
     app.UseHttpsRedirection();
 
     app.UseAuthorization();

@@ -26,6 +26,7 @@ namespace Store.Infrastructure.Extensions
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IUserMessageRepository, UserMessageRepository>();
         }
     }
 }

@@ -13,11 +13,18 @@ namespace Store.Application.Services
 {
     public class UserService(
         UserManager<Entity.User> userManager,
+        SignInManager<Entity.User> signInManager,
         IValidator<UserDto> validator,
         ILogger<UserService> logger,
         IMailService mailService)
         : IUserService
     {
+        public async Task<bool> IsAnyUserByEmailAsync(string email, CancellationToken cancellationToken)
+        {
+            var existedUser = await userManager.FindByEmailAsync(email);
+            return existedUser != null ? true : false;
+        }
+
         public async Task<bool> RegisterUserAsync(UserDto userDto, CancellationToken cancellationToken)
         {
             logger.LogInformation($"Register new user - {userDto.Email}");
@@ -99,6 +106,11 @@ namespace Store.Application.Services
             }
 
             logger.LogInformation($"Password successfully reset for {user.Email}");
+        }
+
+        public async Task LogOutAsync(CancellationToken cancellationToken)
+        {
+            await signInManager.SignOutAsync();
         }
     }
 }
