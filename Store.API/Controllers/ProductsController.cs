@@ -32,10 +32,17 @@ namespace Store.API.Controllers
             return Ok(result);
         }
 
+
         [HttpGet("{productId}")]
         public async Task<IActionResult> GetProductDetailsByIdAsync([FromRoute]int productId, CancellationToken cancellationToken)
         {
             var result = await _productService.GetByIdAsync(productId, cancellationToken);
+            if (User.Identity?.IsAuthenticated == false) 
+            {
+                result.Price = 0;
+                result.Discount = 0;
+            }
+
             return Ok(result);
         }
 
@@ -45,6 +52,14 @@ namespace Store.API.Controllers
         {
             var result = await _productService.CreateAsync(productDto, cancellationToken);
             return Ok(result);
+        }
+
+        [HttpPost("{productId}/upload-images")]
+        [Authorize(Roles = UserRole.Admin)]
+        public async Task<IActionResult> HandleImagesAsync([FromRoute] int productId, [FromForm] List<ImageFileDto> images, CancellationToken cancellationToken)
+        {
+            await _productService.HandleImagesAsync(productId, images, cancellationToken);
+            return NoContent();
         }
 
         [HttpPut("{productId}")]

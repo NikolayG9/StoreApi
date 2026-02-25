@@ -10,6 +10,8 @@ namespace Store.Infrastructure.Configurations
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.IsMain).HasDefaultValue(false);
+            builder.Ignore(x => x.IsNew);
+            builder.Ignore(x => x.IsDeleted);
         }
     }
 }

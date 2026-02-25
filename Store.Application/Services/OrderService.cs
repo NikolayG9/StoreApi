@@ -107,7 +107,8 @@ namespace Store.Application.Services
         public async Task<OrderDto> AddOrderAsync(OrderDto orderDto, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Adding New Order");
-            
+            orderDto.Status = OrderStatus.New;
+
             var validationResult = await _validator.ValidateAsync(orderDto, cancellationToken);
             if (!validationResult.IsValid)
             {
@@ -128,14 +129,14 @@ namespace Store.Application.Services
 
             var newOrder = await _orderRepository.CreateOrderAsync(order, cancellationToken);
 
-            var pdfData = await _pdfGeneratorService.GenerateOrderPdfFileAsync(newOrder.Id, cancellationToken);
+                var pdfData = await _pdfGeneratorService.GenerateOrderPdfFileAsync(newOrder.Id, cancellationToken);
 
             var emailSubject = $"Order Confirmation – Elegant Bride Boutique – Order #{newOrder.Id}";
             var emailBody = EmailMessageConstants.OrderMessageBody
                .Replace("[Customer_Name]", $"{newOrder?.OrderInformation?.FirstName} {newOrder?.OrderInformation?.LastName}")
                .Replace("[Order_Number]", newOrder?.Id.ToString());
 
-            //await _mailService.SendEmailAsync("lolita.culiuc19@gmail.com", emailSubject, emailBody, pdfData, cancellationToken);
+            await _mailService.SendEmailAsync(newOrder.OrderInformation.Email, emailSubject, emailBody, pdfData, cancellationToken);
            
             return _mapper.Map<OrderDto>(newOrder);
         }
