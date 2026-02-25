@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
@@ -16,9 +17,23 @@ namespace Store.Application.Services
         SignInManager<Entity.User> signInManager,
         IValidator<UserDto> validator,
         ILogger<UserService> logger,
-        IMailService mailService)
+        IMailService mailService,
+        IMapper mapper)
         : IUserService
     {
+        public async Task<UserInformationDto?> GetUserInformationById(string userId, CancellationToken cancellationToken)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return null;
+            }
+
+            var userInformation = mapper.Map<UserInformationDto>(user);
+
+            return userInformation;
+        }
+
         public async Task<bool> IsAnyUserByEmailAsync(string email, CancellationToken cancellationToken)
         {
             var existedUser = await userManager.FindByEmailAsync(email);

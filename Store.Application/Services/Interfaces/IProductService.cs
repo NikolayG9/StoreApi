@@ -11,5 +11,6 @@ namespace Store.Application.Services.Interfaces
         Task<ProductDto> CreateAsync(ProductDto productDto, CancellationToken cancellationToken);
         Task<ProductDto> UpdateAsync(ProductDto productDto, CancellationToken cancellationToken);
         Task DeleteAsync(int id, CancellationToken cancellationToken);
+        Task HandleImagesAsync(int productId, List<ImageFileDto> images, CancellationToken cancellationToken);
     }
 }

@@ -9,6 +9,7 @@ namespace Store.Application.Mappers
         public ImageMapper()
         {
             CreateMap<ImageDto, Image>().ReverseMap();
+            CreateMap<ImageFileDto, Image>().ReverseMap();
         }
     }
 }

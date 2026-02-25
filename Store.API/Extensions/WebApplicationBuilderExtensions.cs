@@ -1,7 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 using Serilog;
 using Store.API.Middlewares;
-
 namespace Store.API.Extensions
 {
     public static class WebApplicationBuilderExtensions
@@ -10,7 +9,7 @@ namespace Store.API.Extensions
         {
             builder.Services.ConfigureApplicationCookie(options =>
             {
-                options.ExpireTimeSpan = TimeSpan.FromHours(3);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                 options.SlidingExpiration = true;
                 options.Cookie.SameSite = SameSiteMode.None;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;

@@ -4,6 +4,7 @@ namespace Store.Application.Services.Interfaces
 {
     public interface IUserService
     {
+        Task<UserInformationDto?> GetUserInformationById(string userId, CancellationToken cancellationToken);
         Task<bool> IsAnyUserByEmailAsync(string email, CancellationToken cancellationToken);
         Task<bool> RegisterUserAsync(UserDto userDto, CancellationToken cancellationToken);
         Task ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto, CancellationToken cancellationToken);

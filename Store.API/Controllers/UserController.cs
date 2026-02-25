@@ -20,19 +20,28 @@ namespace Store.API.Controllers
         [HttpGet("user-info")]
         public async Task<IActionResult> GetUserInformation(CancellationToken cancellationToken)
         {
+            var id = User?.FindFirstValue(ClaimTypes.NameIdentifier);
             var email = User?.FindFirstValue(ClaimTypes.Email);
             var role = User?.FindFirstValue(ClaimTypes.Role);
 
-            if (email == null || role == null)
+            if (id == null || email == null || role == null)
             {
                 return Ok(null);
             }
 
             return Ok(new
             {
+                id,
                 email,
                 role
             });
+        }
+
+        [HttpGet("general-user-information")]
+        public async Task<IActionResult> GetGeneralUserInformation(string id, CancellationToken cancellationToken)
+        {
+            var result = await _userService.GetUserInformationById(id, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("email-valid")]
@@ -70,12 +79,12 @@ namespace Store.API.Controllers
             return NoContent();
         }
 
+        [AllowAnonymous]
         [HttpGet("auth-status")]
         public async Task<IActionResult> GetAuthStatus(CancellationToken cancellationToken)
         {
-            return Ok(new {
-                isAuthenticated = User.Identity?.IsAuthenticated ?? false
-            });
+            var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+            return Ok(new {isAuthenticated});
         }
     }
 }

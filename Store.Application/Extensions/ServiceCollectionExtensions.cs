@@ -30,6 +30,7 @@ namespace Store.Application.Extensions
             services.AddScoped<IMailService, MailService>();
             services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
             services.AddScoped<IUserMessageService, UserMessageService>();
+            services.AddScoped<IBlobStorageService, BlobStorageService>();
 
             // Validators
             services.AddValidatorsFromAssemblyContaining(typeof(CollectionDtoValidator));
