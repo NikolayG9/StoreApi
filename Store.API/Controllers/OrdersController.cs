@@ -17,11 +17,11 @@ namespace Store.API.Controllers
             _orderService = orderService;
         }
 
-        [Authorize]
+        [Authorize(Roles = UserRole.Admin)]
         [HttpGet]
-        public async Task<IActionResult> GetOrdersByClientId(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetOrdersByClientId([FromQuery] string userId, CancellationToken cancellationToken)
         {
-            var result = await _orderService.GetOrdersByClientId(cancellationToken);
+            var result = await _orderService.GetOrdersByClientId(userId, cancellationToken);
             return Ok(result);
         }
 
@@ -64,6 +64,15 @@ namespace Store.API.Controllers
             var result = await _orderService.UpdateOrderAsync(orderDto, cancellationToken);
             return Ok(result);
         }
+
+        [Authorize]
+        [HttpPut("update-status/{orderId}")]
+        public async Task<IActionResult> UpdateOrderStatusAsync([FromRoute] int orderId, [FromQuery] string status, CancellationToken cancellationToken)
+        {
+            await _orderService.UpdateOrderStatusAsync(orderId, status, cancellationToken);
+            return NoContent();
+        }
+        
 
         [Authorize(Roles = UserRole.Admin)]
         [HttpDelete("{orderId}")]

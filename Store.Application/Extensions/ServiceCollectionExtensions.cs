@@ -22,6 +22,7 @@ namespace Store.Application.Extensions
             QuestPDF.Settings.License = LicenseType.Community;
 
             // Services
+            services.AddScoped<IColorService, ColorService>();
             services.AddScoped<ICollectionService, CollectionService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IUserService, UserService>();

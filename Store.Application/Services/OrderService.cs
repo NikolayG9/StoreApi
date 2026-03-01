@@ -52,24 +52,27 @@ namespace Store.Application.Services
             var user = _userContext.GetCurrentUser();
             var order = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId, cancellationToken);
 
-            if (user == null || user.Id != order.UserId)
+            if (!user.IsInRole("Admin"))
             {
-                return null;
+                if (user == null || user.Id != order.UserId)
+                {
+                    return null;
+                }
             }
-
+            
             return _mapper.Map<OrderDto>(order);
         }
 
-        public async Task<IEnumerable<OrderDto>> GetOrdersByClientId(CancellationToken cancellationToken)
+        public async Task<IEnumerable<OrderDto>> GetOrdersByClientId(string clientId, CancellationToken cancellationToken)
         {
             var currentUser = _userContext.GetCurrentUser();
             if (currentUser == null)
             {
-                throw new UnauthorizedAccessException("");
+                throw new UnauthorizedAccessException("You don't have an access");
             }
-            _logger.LogInformation($"Getting Orders By Client Id - {currentUser.Id}");
+            _logger.LogInformation($"Getting Orders By Client Id - {clientId}");
 
-            var order = await _orderRepository.GetOrdersByClientIdAsync(currentUser.Id, cancellationToken);
+            var order = await _orderRepository.GetOrdersByClientIdAsync(clientId, cancellationToken);
             return _mapper.Map<IEnumerable<OrderDto>>(order);
         }
 
@@ -133,8 +136,7 @@ namespace Store.Application.Services
 
             var emailSubject = $"Order Confirmation – Elegant Bride Boutique – Order #{newOrder.Id}";
             var emailBody = EmailMessageConstants.OrderMessageBody
-               .Replace("[Customer_Name]", $"{newOrder?.OrderInformation?.FirstName} {newOrder?.OrderInformation?.LastName}")
-               .Replace("[Order_Number]", newOrder?.Id.ToString());
+               .Replace("[Customer_Name]", $"{newOrder?.OrderInformation?.FirstName} {newOrder?.OrderInformation?.LastName}");
 
             await _mailService.SendEmailAsync(newOrder.OrderInformation.Email, emailSubject, emailBody, pdfData, cancellationToken);
            
@@ -168,6 +170,18 @@ namespace Store.Application.Services
 
             var newOrder = await _orderRepository.UpdateOrderAsync(order, cancellationToken);
             return _mapper.Map<OrderDto>(newOrder);
+        }
+
+        public async Task UpdateOrderStatusAsync(int orderId, string status, CancellationToken cancellationToken)
+        {
+            var order = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId, cancellationToken);
+            if (order == null)
+            {
+                throw new NotFoundException(nameof(Order), orderId.ToString());
+            }
+
+            order.Status = status;
+            await _orderRepository.UpdateOrderAsync(order, cancellationToken);
         }
 
         public async Task<OrderDto> CancelSoftDeletedOrderById(int orderId, CancellationToken cancellationToken)

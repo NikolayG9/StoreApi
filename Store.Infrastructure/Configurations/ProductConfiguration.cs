@@ -10,8 +10,8 @@ namespace Store.Infrastructure.Configurations
         {
             builder.HasKey(x => x.Id);
 
-            builder.HasMany(p => p.Colors)
-                    .WithOne()
+            builder.HasMany(p => p.ProductColors)
+                    .WithOne(pc => pc.Product)
                     .HasForeignKey(c => c.ProductId);
 
             builder.HasMany(p => p.Images)

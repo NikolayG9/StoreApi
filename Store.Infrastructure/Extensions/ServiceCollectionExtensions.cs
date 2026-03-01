@@ -24,6 +24,7 @@ namespace Store.Infrastructure.Extensions
             services.AddScoped<IStoreSeeder, StoreSeeder>();
             services.AddScoped<ICollectionRepository, CollectionRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IColorRepository, ColorRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IUserMessageRepository, UserMessageRepository>();
