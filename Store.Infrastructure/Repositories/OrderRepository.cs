@@ -17,6 +17,7 @@ namespace Store.Infrastructure.Repositories
         {
             var orders = await dbContext.Orders
                 .Include(x => x.OrderInformation)
+                .Include(x => x.OrderedProducts)
                 .Where(x => x.UserId == clientId && x.IsSoftDeleted == false)
                 .ToListAsync();
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Store.Application.DataTransferObjects;
 using Store.Application.Services.Interfaces;
+using Store.Domain.Constants;
 using System.Security.Claims;
 
 namespace Store.API.Controllers
@@ -15,6 +16,14 @@ namespace Store.API.Controllers
         public UserController(IUserService userService)
         {
             _userService = userService;
+        }
+
+        [HttpGet("get-all")]
+        [Authorize(Roles = UserRole.Admin)]
+        public async Task<IActionResult> GetAllUsersAsync(CancellationToken cancellationToken)
+        {
+            var result = await _userService.GetAllUsersAsync(cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("user-info")]
@@ -40,7 +49,7 @@ namespace Store.API.Controllers
         [HttpGet("general-user-information")]
         public async Task<IActionResult> GetGeneralUserInformation(string id, CancellationToken cancellationToken)
         {
-            var result = await _userService.GetUserInformationById(id, cancellationToken);
+            var result = await _userService.GetUserInformationByIdAsync(id, cancellationToken);
             return Ok(result);
         }
 

@@ -21,7 +21,13 @@ namespace Store.Application.Services
         IMapper mapper)
         : IUserService
     {
-        public async Task<UserInformationDto?> GetUserInformationById(string userId, CancellationToken cancellationToken)
+        public async Task<List<UserInformationDto>> GetAllUsersAsync(CancellationToken cancellationToken)
+        {
+            var users = await userManager.GetUsersInRoleAsync(UserRole.Client);
+            return mapper.Map<List<UserInformationDto>>(users);
+        }
+
+        public async Task<UserInformationDto?> GetUserInformationByIdAsync(string userId, CancellationToken cancellationToken)
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)

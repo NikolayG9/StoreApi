@@ -76,6 +76,10 @@ namespace Store.Application.Services
             await CheckProductDtoValidation(productDto, cancellationToken);
 
             var product = _mapper.Map<Product>(productDto);
+
+            product.ProductColors = new List<ProductColor>();
+            MapColorsToProduct(product, productDto.Colors);
+
             if (product.Images != null && product.Images.Any())
             {
                 product.Images.Clear();
@@ -89,17 +93,21 @@ namespace Store.Application.Services
         public async Task<ProductDto> UpdateAsync(ProductDto productDto, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Updating Product With Id = {productDto.Id}");
-            var isProductExist = await _repository.GetByIdAsync(productDto.Id, cancellationToken);
-            if (await _repository.IsAnyProductByIdAsync(productDto.Id, cancellationToken) == false)
-            {
-                throw new NotFoundException(nameof(Product),  productDto.Id.ToString());
-            }
+
+            var existingProduct = await _repository.GetByIdAsync(productDto.Id, cancellationToken);
+            if (existingProduct == null)
+                throw new NotFoundException(nameof(Product), productDto.Id.ToString());
 
             await CheckProductDtoValidation(productDto, cancellationToken);
 
-            var product = _mapper.Map<Product>(productDto);
+            _mapper.Map(productDto, existingProduct);
 
-            var updatedProduct = await _repository.UpdateProductAsync(product, cancellationToken);
+            if (existingProduct.ProductColors == null)
+                existingProduct.ProductColors = new List<ProductColor>();
+            MapColorsToProduct(existingProduct, productDto.Colors);
+
+            var updatedProduct = await _repository.UpdateProductAsync(existingProduct, cancellationToken);
+
             return _mapper.Map<ProductDto>(updatedProduct);
         }
 
@@ -144,8 +152,9 @@ namespace Store.Application.Services
                     var imageUrl = string.Empty;
                     if (imageDto.File != null)
                     {
-                        using var stream = imageDto.File.OpenReadStream();
-                        imageUrl = await _blobStorageService.UploadProductImageToBlobStorageAsync(imageDto.File.FileName, stream, cancellationToken);
+                        /* using var stream = imageDto.File.OpenReadStream();
+                         imageUrl = await _blobStorageService.UploadProductImageToBlobStorageAsync(imageDto.File.FileName, stream, cancellationToken);*/
+                        imageUrl = "https://oksana-mukha.com/cdn-cgi/image/quality=100/uploads/picture/image/5016/1u3a5714.jpg";
                     }
 
                     var image = _mapper.Map<Image>(imageDto);
@@ -158,7 +167,7 @@ namespace Store.Application.Services
                 {
                     if (!string.IsNullOrEmpty(imageDto.ImageUrl))
                     {
-                        await _blobStorageService.DeleteProductImageFromBlobStorageAsync(imageDto.ImageUrl, cancellationToken);
+                        //await _blobStorageService.DeleteProductImageFromBlobStorageAsync(imageDto.ImageUrl, cancellationToken);
                     }
 
                     var image = _mapper.Map<Image>(imageDto);
@@ -166,6 +175,29 @@ namespace Store.Application.Services
 
                     await _repository.DeleteProductImageAsync(image, cancellationToken);
                 }
+            }
+        }
+
+        private void MapColorsToProduct(Product product, List<ColorDto> colorDtos)
+        {
+            var existingColorIds = product.ProductColors?.Select(pc => pc.ColorId).ToList() ?? new List<int>();
+            var newColorIds = colorDtos.Select(c => c.Id).ToList();
+
+            // Remove colors that are no longer assigned
+            var toRemove = product.ProductColors
+                                  .Where(pc => !newColorIds.Contains(pc.ColorId))
+                                  .ToList();
+            foreach (var pc in toRemove)
+                product.ProductColors.Remove(pc);
+
+            // Add newly assigned colors
+            foreach (var colorId in newColorIds.Where(id => !existingColorIds.Contains(id)))
+            {
+                product.ProductColors.Add(new ProductColor
+                {
+                    ProductId = product.Id,
+                    ColorId = colorId
+                });
             }
         }
     }

@@ -54,7 +54,8 @@ namespace Store.Infrastructure.Repositories
         {
             var product = await dbContext.Products
                                          .Include(x => x.Images)
-                                         .Include(y => y.Colors)
+                                         .Include(y => y.ProductColors)
+                                         .ThenInclude(pc => pc.Color)
                                          .FirstOrDefaultAsync(p => p.Id == productId);
             
             return product;
@@ -85,7 +86,8 @@ namespace Store.Infrastructure.Repositories
         {
             var existingProduct = await dbContext.Products
                                                  .Include(x => x.Images)
-                                                 .Include(y => y.Colors)
+                                                 .Include(y => y.ProductColors)
+                                                 .ThenInclude(pc => pc.Color)
                                                  .FirstAsync(x => x.Id == product.Id);
 
             // Update properties
@@ -96,33 +98,28 @@ namespace Store.Infrastructure.Repositories
             existingProduct.Discount = product.Discount;
             existingProduct.CollectionId = product.CollectionId;
 
-            // Handle Colors
-            var existingColors = existingProduct.Colors.ToList();
+            // Handle Colors (many-to-many)
+            var existingColorIds = existingProduct.ProductColors.Select(pc => pc.ColorId).ToList();
+            var newColorIds = product.ProductColors.Select(pc => pc.ColorId).ToList();
 
-            // Remove deleted colors
-            foreach (var existingColor in existingColors)
-            {
-                if (!product.Colors.Any(x => x.Id == existingColor.Id))
-                {
-                    dbContext.Colors.Remove(existingColor);
-                }
-            }
+            // Remove unassigned colors
+            var toRemove = existingProduct.ProductColors
+                                          .Where(pc => !newColorIds.Contains(pc.ColorId))
+                                          .ToList();
+            foreach (var pc in toRemove)
+                existingProduct.ProductColors.Remove(pc);
 
-            // Add or Update Colors
-            foreach(var color in product.Colors)
-            {
-                var existingColor = existingColors.FirstOrDefault(x => x.Id == color.Id);
-                if (existingColor == null)
-                {
-                    color.ProductId = existingProduct.Id;
-                    existingProduct.Colors.Add(color);
-                }
-                else
-                {
-                    existingColor.Name = color.Name;
-                    existingColor.HexColorCode = color.HexColorCode;
-                }
-            }
+            // Add newly assigned colors
+            var toAdd = newColorIds
+                        .Where(id => !existingColorIds.Contains(id))
+                        .Select(id => new ProductColor
+                        {
+                            ProductId = existingProduct.Id,
+                            ColorId = id
+                        });
+
+            foreach (var pc in toAdd)
+                existingProduct.ProductColors.Add(pc);
 
             await dbContext.SaveChangesAsync();
 

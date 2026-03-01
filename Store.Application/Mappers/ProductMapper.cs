@@ -8,7 +8,15 @@ namespace Store.Application.Mappers
     {
         public ProductMapper()
         {
-            CreateMap<ProductDto, Product>().ReverseMap();
+            CreateMap<Product, ProductDto>()
+                .ForMember(
+                    dest => dest.Colors,
+                    opt => opt.MapFrom(src => src.ProductColors.Select(pc => pc.Color))
+                );
+
+            CreateMap<ProductDto, Product>()
+                .ForMember(dest => dest.ProductColors, opt => opt.Ignore())
+                .ForMember(dest => dest.Images, opt => opt.Ignore());
         }
     }
 }

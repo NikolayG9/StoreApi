@@ -13,6 +13,6 @@
         public int CollectionId { get; set; }
 
         public List<Image> Images { get; set; }
-        public List<Color> Colors { get; set; }
+        public List<ProductColor> ProductColors { get; set; }
     }
 }
