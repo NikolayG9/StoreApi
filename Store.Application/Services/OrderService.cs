@@ -130,17 +130,21 @@ namespace Store.Application.Services
             order.UserId = currentUser.Id;
             order.OrderDate = DateTime.UtcNow;
 
-            var newOrder = await _orderRepository.CreateOrderAsync(order, cancellationToken);
+            // Save data in DB. Comment this code to avoid saving data in database
+            // var newOrder = await _orderRepository.CreateOrderAsync(order, cancellationToken);
 
-                var pdfData = await _pdfGeneratorService.GenerateOrderPdfFileAsync(newOrder.Id, cancellationToken);
+            var pdfData = await _pdfGeneratorService.GenerateOrderPdfFileAsync(order, cancellationToken);
 
-            var emailSubject = $"Order Confirmation – Elegant Bride Boutique – Order #{newOrder.Id}";
+            var emailSubject = $"Order Confirmation – Elorienne Bridal";
             var emailBody = EmailMessageConstants.OrderMessageBody
-               .Replace("[Customer_Name]", $"{newOrder?.OrderInformation?.FirstName} {newOrder?.OrderInformation?.LastName}");
+               .Replace("[Customer_Name]", $"{order?.OrderInformation?.FirstName} {order?.OrderInformation?.LastName}");
 
-            await _mailService.SendEmailAsync(newOrder.OrderInformation.Email, emailSubject, emailBody, pdfData, cancellationToken);
-           
-            return _mapper.Map<OrderDto>(newOrder);
+            _logger.LogInformation($"New Order - {emailBody}");
+
+            await _mailService.SendEmailAsync(order.OrderInformation.Email, emailSubject, emailBody, pdfData, cancellationToken);
+            await _mailService.SendEmailAsync("nikolaygolovach9@gmail.com", emailSubject, emailBody, pdfData, cancellationToken);
+
+            return _mapper.Map<OrderDto>(order);
         }
 
         public async Task<OrderDto> UpdateOrderAsync(OrderDto orderDto, CancellationToken cancellationToken)
