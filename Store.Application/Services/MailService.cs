@@ -53,7 +53,7 @@ namespace Store.Application.Services
             var mailMessage = new MailMessage
             {
                 From = new MailAddress(_gmailOptions.Email),
-                Subject = "Elegant Bride Boutique - Reset Password",
+                Subject = "Elorienne Bridal - Reset Password",
                 Body = $"Click on the link to reset the password: <a href='{resetLink}'>Reset Password</a>",
                 IsBodyHtml = true
             };

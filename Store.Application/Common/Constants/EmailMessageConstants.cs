@@ -8,6 +8,6 @@
             "Attached is your PDF invoice with all the details of your order.\r\n\r\n" +
             "We will contact you to confirm your order.\r\n\r\n" +
             "With love,\r\n" +
-            "Elegant Bride Boutique";
+            "Elorienne Bridal";
     }
 }
