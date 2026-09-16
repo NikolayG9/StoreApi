@@ -39,5 +39,5 @@ jobs:
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v3.0.0
         with:
-          app-name: 'wed-store-api-dev'
-          publish-profile: ${{ secrets.PUBLISH_PROFILE_DEV }}
+          app-name: 'elorienne-bridal-store-api'
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}

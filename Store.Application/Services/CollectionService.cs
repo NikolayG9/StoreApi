@@ -61,10 +61,10 @@ namespace Store.Application.Services
 
             if (collectionDto.File != null)
             {
-/*                using var stream = collectionDto.File.OpenReadStream();
+                using var stream = collectionDto.File.OpenReadStream();
                 var imageUrl = await _blobStorageService.UploadCollectionImageToBlobStorageAsync(collectionDto.File.FileName, stream, cancellationToken);
 
-                collection.ImageUrl = imageUrl;*/
+                collection.ImageUrl = imageUrl;
             }
 
             var createdCollection = await _collectionRepository.CreateAsync(collection, cancellationToken);
@@ -81,15 +81,15 @@ namespace Store.Application.Services
 
             if (collectionDto.File != null)
             {
-                //using var stream = collectionDto.File.OpenReadStream();
+                using var stream = collectionDto.File.OpenReadStream();
 
-                //if (!string.IsNullOrEmpty(collectionDto.ImageUrl))
-                //{
-                //    await _blobStorageService.DeleteCollectionImageFromBlobStorageAsync(collectionDto.ImageUrl, cancellationToken);
-                //}
+                if (!string.IsNullOrEmpty(collectionDto.ImageUrl))
+                {
+                    await _blobStorageService.DeleteCollectionImageFromBlobStorageAsync(collectionDto.ImageUrl, cancellationToken);
+                }
 
-                //var imageUrl = await _blobStorageService.UploadCollectionImageToBlobStorageAsync(collectionDto.File.FileName, stream, cancellationToken);
-                //collection.ImageUrl = imageUrl;
+                var imageUrl = await _blobStorageService.UploadCollectionImageToBlobStorageAsync(collectionDto.File.FileName, stream, cancellationToken);
+                collection.ImageUrl = imageUrl;
             }
 
             var updatedCollection = await _collectionRepository.UpdateAsync(collection, cancellationToken);

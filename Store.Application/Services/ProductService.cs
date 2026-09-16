@@ -152,9 +152,8 @@ namespace Store.Application.Services
                     var imageUrl = string.Empty;
                     if (imageDto.File != null)
                     {
-                        /* using var stream = imageDto.File.OpenReadStream();
-                         imageUrl = await _blobStorageService.UploadProductImageToBlobStorageAsync(imageDto.File.FileName, stream, cancellationToken);*/
-                        imageUrl = "https://oksana-mukha.com/cdn-cgi/image/quality=100/uploads/picture/image/5016/1u3a5714.jpg";
+                        using var stream = imageDto.File.OpenReadStream();
+                        imageUrl = await _blobStorageService.UploadProductImageToBlobStorageAsync(imageDto.File.FileName, stream, cancellationToken);
                     }
 
                     var image = _mapper.Map<Image>(imageDto);
@@ -167,7 +166,7 @@ namespace Store.Application.Services
                 {
                     if (!string.IsNullOrEmpty(imageDto.ImageUrl))
                     {
-                        //await _blobStorageService.DeleteProductImageFromBlobStorageAsync(imageDto.ImageUrl, cancellationToken);
+                        await _blobStorageService.DeleteProductImageFromBlobStorageAsync(imageDto.ImageUrl, cancellationToken);
                     }
 
                     var image = _mapper.Map<Image>(imageDto);
