@@ -28,7 +28,10 @@ jobs:
           name: api-artifact
           path: ${{env.DOTNET_ROOT}}/api
 
-  deploy-dev:
+  deploy:
+    environment:
+      name: 'Main'
+      url: ${{steps.deploy-to-webapp.outputs.webapp-url}}
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -38,6 +41,7 @@ jobs:
           name: api-artifact
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v3.0.0
+        id: deploy-to-webapp
         with:
           app-name: 'elorienne-bridal-store-api'
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
