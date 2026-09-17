@@ -40,7 +40,7 @@ try
     app.MapGroup("api/identity").MapIdentityApi<User>();
 
     app.UseCors(x => x
-       .WithOrigins("http://localhost:4200", "https://localhost:4200")
+       .WithOrigins("http://localhost:4200", "https://localhost:4200", "https://jolly-meadow-0b7315610.4.azurestaticapps.net")
        .AllowAnyHeader()
        .AllowAnyMethod()
        .AllowCredentials());
