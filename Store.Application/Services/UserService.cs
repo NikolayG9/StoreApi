@@ -78,7 +78,7 @@ namespace Store.Application.Services
             var createdUser = await userManager.FindByEmailAsync(userDto.Email)
                 ?? throw new NotFoundException(nameof(UserDto), userDto.Email);
 
-            await userManager.AddToRoleAsync(createdUser, UserRole.Admin);
+            await userManager.AddToRoleAsync(createdUser, UserRole.Client);
 
             return userResult.Succeeded;
         }
