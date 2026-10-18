@@ -1,4 +1,6 @@
-﻿using QuestPDF.Fluent;
+﻿
+using System.Globalization;
+using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using Store.Application.Services.Interfaces;
@@ -11,14 +13,25 @@ namespace Store.Application.Services
     {
         private readonly IOrderRepository _orderRepository;
 
+        private static readonly CultureInfo EuroCulture =
+            CultureInfo.GetCultureInfo("de-DE");
+
         public PdfGeneratorService(IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
         }
 
-        public async Task<byte[]> GenerateOrderPdfFileAsync(int orderId, CancellationToken cancellationToken)
+        private static string FormatEuro(decimal amount)
         {
-            var order = await _orderRepository.GetOrderDetailsByOrderIdAsync(orderId, cancellationToken);
+            return amount.ToString("C2", EuroCulture);
+        }
+
+        public async Task<byte[]> GenerateOrderPdfFileAsync(
+            int orderId,
+            CancellationToken cancellationToken)
+        {
+            var order = await _orderRepository
+                .GetOrderDetailsByOrderIdAsync(orderId, cancellationToken);
 
             var pdfBytes = Document.Create(document =>
             {
@@ -26,9 +39,7 @@ namespace Store.Application.Services
                 {
                     page.Margin(30);
 
-                    // -------------------------
                     // HEADER
-                    // -------------------------
                     page.Header().PaddingBottom(20).Row(row =>
                     {
                         row.RelativeItem().Column(col =>
@@ -36,17 +47,17 @@ namespace Store.Application.Services
                             col.Item().Text("Elorienne Bridal")
                                 .FontSize(20).Bold();
 
-                            col.Item().Text($"Order Date: {order.OrderDate:yyyy-MM-dd HH:mm}");
+                            col.Item().Text(
+                                $"Order Date: {order.OrderDate:yyyy-MM-dd HH:mm}");
+
                             col.Item().Text($"Order ID: {order.Id}");
                         });
                     });
 
-                    // -------------------------
                     // CONTENT
-                    // -------------------------
                     page.Content().PaddingVertical(10).Column(col =>
                     {
-                        // Customer Info Section
+                        // Customer Information
                         col.Item().Border(1).Padding(10).Column(cust =>
                         {
                             cust.Item().Text("Customer Information")
@@ -54,15 +65,29 @@ namespace Store.Application.Services
 
                             cust.Spacing(5);
 
-                            cust.Item().Text($"{order.OrderInformation.FirstName} {order.OrderInformation.LastName}");
-                            cust.Item().Text($"{order.OrderInformation.Address}, {order.OrderInformation.City}, {order.OrderInformation.PostalCode}, {order.OrderInformation.Country}");
-                            cust.Item().Text($"Phone: {order.OrderInformation.PhoneNumber}");
-                            cust.Item().Text($"Email: {order.OrderInformation.Email}");
+                            cust.Item().Text(
+                                $"{order.OrderInformation.FirstName} " +
+                                $"{order.OrderInformation.LastName}");
 
-                            if (!string.IsNullOrWhiteSpace(order.OrderInformation.OrderDetails))
+                            cust.Item().Text(
+                                $"{order.OrderInformation.Address}, " +
+                                $"{order.OrderInformation.City}, " +
+                                $"{order.OrderInformation.PostalCode}, " +
+                                $"{order.OrderInformation.Country}");
+
+                            cust.Item().Text(
+                                $"Phone: {order.OrderInformation.PhoneNumber}");
+
+                            cust.Item().Text(
+                                $"Email: {order.OrderInformation.Email}");
+
+                            if (!string.IsNullOrWhiteSpace(
+                                order.OrderInformation.OrderDetails))
                             {
                                 cust.Spacing(5);
-                                cust.Item().Text($"Notes: {order.OrderInformation.OrderDetails}");
+
+                                cust.Item().Text(
+                                    $"Notes: {order.OrderInformation.OrderDetails}");
                             }
                         });
 
@@ -75,15 +100,15 @@ namespace Store.Application.Services
                             {
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.RelativeColumn(3);   // product + collection
-                                    columns.RelativeColumn(1);   // color
-                                    columns.RelativeColumn(1);   // size
-                                    columns.RelativeColumn(1);   // qty
-                                    columns.RelativeColumn(1);   // unit price
-                                    columns.RelativeColumn(1);   // total
+                                    columns.RelativeColumn(3);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
                                 });
 
-                                // HEADER
+                                // TABLE HEADER
                                 table.Header(header =>
                                 {
                                     header.Cell().Element(Th).Text("Product");
@@ -94,57 +119,79 @@ namespace Store.Application.Services
                                     header.Cell().Element(Th).Text("Total");
                                 });
 
-                                // ROWS
+                                // TABLE ROWS
                                 foreach (var p in order.OrderedProducts)
                                 {
                                     decimal unitPrice = p.Price;
                                     decimal discount = p.Discount ?? 0;
                                     decimal effectivePrice = unitPrice - discount;
-                                    decimal lineTotal = effectivePrice * p.ProductQuantity;
+                                    decimal lineTotal =
+                                        effectivePrice * p.ProductQuantity;
 
                                     table.Cell().Element(Td)
                                         .Text($"{p.Name} ({p.CollectionName})");
 
-                                    table.Cell().Element(Td).Text(p.SelectedColor);
-                                    table.Cell().Element(Td).Text(p.SelectedSize);
-                                    table.Cell().Element(Td).Text(p.ProductQuantity.ToString());
-                                    table.Cell().Element(Td).Text($"{effectivePrice:C}");
-                                    table.Cell().Element(Td).Text($"{lineTotal:C}");
+                                    table.Cell().Element(Td)
+                                        .Text(p.SelectedColor);
+
+                                    table.Cell().Element(Td)
+                                        .Text(p.SelectedSize);
+
+                                    table.Cell().Element(Td)
+                                        .Text(p.ProductQuantity.ToString());
+
+                                    table.Cell().Element(Td)
+                                        .Text(FormatEuro(effectivePrice));
+
+                                    table.Cell().Element(Td)
+                                        .Text(FormatEuro(lineTotal));
                                 }
                             });
 
                             // Styled cells
                             static IContainer Td(IContainer c) =>
-                                c.BorderBottom(0.5f).PaddingVertical(5).PaddingHorizontal(2);
+                                c.BorderBottom(0.5f)
+                                    .PaddingVertical(5)
+                                    .PaddingHorizontal(2);
 
                             static IContainer Th(IContainer c) =>
-                                c.Background(Colors.Grey.Lighten3).Padding(5);
+                                c.Background(Colors.Grey.Lighten3)
+                                    .Padding(5);
                         });
 
                         col.Spacing(20);
 
-                        // Totals Section
+                        // TOTALS
                         col.Item().AlignRight().Column(sum =>
                         {
-                            decimal subtotal = order.OrderedProducts.Sum(p => p.Price * p.ProductQuantity);
-                            decimal totalDiscount = order.OrderedProducts.Sum(p => (p.Discount ?? 0) * p.ProductQuantity);
+                            decimal subtotal = order.OrderedProducts
+                                .Sum(p => p.Price * p.ProductQuantity);
+
+                            decimal totalDiscount = order.OrderedProducts
+                                .Sum(p => (p.Discount ?? 0) * p.ProductQuantity);
+
                             decimal finalTotal = subtotal - totalDiscount;
 
-                            sum.Item().Text($"Subtotal: {subtotal:C}");
+                            sum.Item().Text(
+                                $"Subtotal: {FormatEuro(subtotal)}");
 
                             if (totalDiscount > 0)
                             {
-                                sum.Item().Text($"Discount: -{totalDiscount:C}")
+                                sum.Item().Text(
+                                    $"Discount: - {FormatEuro(totalDiscount)}")
                                     .FontColor(Colors.Red.Medium);
                             }
 
                             sum.Spacing(7);
-                            sum.Item().Text($"TOTAL: {finalTotal:C}")
-                                .FontSize(14).Bold();
+
+                            sum.Item().Text(
+                                $"TOTAL: {FormatEuro(finalTotal)}")
+                                .FontSize(14)
+                                .Bold();
                         });
                     });
 
-                    // Footer
+                    // FOOTER
                     page.Footer().AlignCenter()
                         .Text($"Generated on {DateTime.Now:yyyy-MM-dd HH:mm}");
                 });
@@ -153,7 +200,9 @@ namespace Store.Application.Services
             return pdfBytes;
         }
 
-        public async Task<byte[]> GenerateOrderPdfFileAsync(Order order, CancellationToken cancellationToken)
+        public async Task<byte[]> GenerateOrderPdfFileAsync(
+            Order order,
+            CancellationToken cancellationToken)
         {
             var pdfBytes = Document.Create(document =>
             {
@@ -161,9 +210,7 @@ namespace Store.Application.Services
                 {
                     page.Margin(30);
 
-                    // -------------------------
                     // HEADER
-                    // -------------------------
                     page.Header().PaddingBottom(20).Row(row =>
                     {
                         row.RelativeItem().Column(col =>
@@ -171,16 +218,15 @@ namespace Store.Application.Services
                             col.Item().Text("Elorienne Bridal")
                                 .FontSize(20).Bold();
 
-                            col.Item().Text($"Order Date: {order.OrderDate:yyyy-MM-dd HH:mm}");
+                            col.Item().Text(
+                                $"Order Date: {order.OrderDate:yyyy-MM-dd HH:mm}");
                         });
                     });
 
-                    // -------------------------
                     // CONTENT
-                    // -------------------------
                     page.Content().PaddingVertical(10).Column(col =>
                     {
-                        // Customer Info Section
+                        // Customer Information
                         col.Item().Border(1).Padding(10).Column(cust =>
                         {
                             cust.Item().Text("Customer Information")
@@ -188,15 +234,29 @@ namespace Store.Application.Services
 
                             cust.Spacing(5);
 
-                            cust.Item().Text($"{order.OrderInformation.FirstName} {order.OrderInformation.LastName}");
-                            cust.Item().Text($"{order.OrderInformation.Address}, {order.OrderInformation.City}, {order.OrderInformation.PostalCode}, {order.OrderInformation.Country}");
-                            cust.Item().Text($"Phone: {order.OrderInformation.PhoneNumber}");
-                            cust.Item().Text($"Email: {order.OrderInformation.Email}");
+                            cust.Item().Text(
+                                $"{order.OrderInformation.FirstName} " +
+                                $"{order.OrderInformation.LastName}");
 
-                            if (!string.IsNullOrWhiteSpace(order.OrderInformation.OrderDetails))
+                            cust.Item().Text(
+                                $"{order.OrderInformation.Address}, " +
+                                $"{order.OrderInformation.City}, " +
+                                $"{order.OrderInformation.PostalCode}, " +
+                                $"{order.OrderInformation.Country}");
+
+                            cust.Item().Text(
+                                $"Phone: {order.OrderInformation.PhoneNumber}");
+
+                            cust.Item().Text(
+                                $"Email: {order.OrderInformation.Email}");
+
+                            if (!string.IsNullOrWhiteSpace(
+                                order.OrderInformation.OrderDetails))
                             {
                                 cust.Spacing(5);
-                                cust.Item().Text($"Notes: {order.OrderInformation.OrderDetails}");
+
+                                cust.Item().Text(
+                                    $"Notes: {order.OrderInformation.OrderDetails}");
                             }
                         });
 
@@ -209,15 +269,15 @@ namespace Store.Application.Services
                             {
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.RelativeColumn(3);   // product + collection
-                                    columns.RelativeColumn(1);   // color
-                                    columns.RelativeColumn(1);   // size
-                                    columns.RelativeColumn(1);   // qty
-                                    columns.RelativeColumn(1);   // unit price
-                                    columns.RelativeColumn(1);   // total
+                                    columns.RelativeColumn(3);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
                                 });
 
-                                // HEADER
+                                // TABLE HEADER
                                 table.Header(header =>
                                 {
                                     header.Cell().Element(Th).Text("Product");
@@ -228,57 +288,79 @@ namespace Store.Application.Services
                                     header.Cell().Element(Th).Text("Total");
                                 });
 
-                                // ROWS
+                                // TABLE ROWS
                                 foreach (var p in order.OrderedProducts)
                                 {
                                     decimal unitPrice = p.Price;
                                     decimal discount = p.Discount ?? 0;
                                     decimal effectivePrice = unitPrice - discount;
-                                    decimal lineTotal = effectivePrice * p.ProductQuantity;
+                                    decimal lineTotal =
+                                        effectivePrice * p.ProductQuantity;
 
                                     table.Cell().Element(Td)
                                         .Text($"{p.Name} ({p.CollectionName})");
 
-                                    table.Cell().Element(Td).Text(p.SelectedColor);
-                                    table.Cell().Element(Td).Text(p.SelectedSize);
-                                    table.Cell().Element(Td).Text(p.ProductQuantity.ToString());
-                                    table.Cell().Element(Td).Text($"{effectivePrice:C}");
-                                    table.Cell().Element(Td).Text($"{lineTotal:C}");
+                                    table.Cell().Element(Td)
+                                        .Text(p.SelectedColor);
+
+                                    table.Cell().Element(Td)
+                                        .Text(p.SelectedSize);
+
+                                    table.Cell().Element(Td)
+                                        .Text(p.ProductQuantity.ToString());
+
+                                    table.Cell().Element(Td)
+                                        .Text(FormatEuro(effectivePrice));
+
+                                    table.Cell().Element(Td)
+                                        .Text(FormatEuro(lineTotal));
                                 }
                             });
 
                             // Styled cells
                             static IContainer Td(IContainer c) =>
-                                c.BorderBottom(0.5f).PaddingVertical(5).PaddingHorizontal(2);
+                                c.BorderBottom(0.5f)
+                                    .PaddingVertical(5)
+                                    .PaddingHorizontal(2);
 
                             static IContainer Th(IContainer c) =>
-                                c.Background(Colors.Grey.Lighten3).Padding(5);
+                                c.Background(Colors.Grey.Lighten3)
+                                    .Padding(5);
                         });
 
                         col.Spacing(20);
 
-                        // Totals Section
+                        // TOTALS
                         col.Item().AlignRight().Column(sum =>
                         {
-                            decimal subtotal = order.OrderedProducts.Sum(p => p.Price * p.ProductQuantity);
-                            decimal totalDiscount = order.OrderedProducts.Sum(p => (p.Discount ?? 0) * p.ProductQuantity);
+                            decimal subtotal = order.OrderedProducts
+                                .Sum(p => p.Price * p.ProductQuantity);
+
+                            decimal totalDiscount = order.OrderedProducts
+                                .Sum(p => (p.Discount ?? 0) * p.ProductQuantity);
+
                             decimal finalTotal = subtotal - totalDiscount;
 
-                            sum.Item().Text($"Subtotal: {subtotal:C}");
+                            sum.Item().Text(
+                                $"Subtotal: {FormatEuro(subtotal)}");
 
                             if (totalDiscount > 0)
                             {
-                                sum.Item().Text($"Discount: -{totalDiscount:C}")
+                                sum.Item().Text(
+                                    $"Discount: - {FormatEuro(totalDiscount)}")
                                     .FontColor(Colors.Red.Medium);
                             }
 
                             sum.Spacing(7);
-                            sum.Item().Text($"TOTAL: {finalTotal:C}")
-                                .FontSize(14).Bold();
+
+                            sum.Item().Text(
+                                $"TOTAL: {FormatEuro(finalTotal)}")
+                                .FontSize(14)
+                                .Bold();
                         });
                     });
 
-                    // Footer
+                    // FOOTER
                     page.Footer().AlignCenter()
                         .Text($"Generated on {DateTime.Now:yyyy-MM-dd HH:mm}");
                 });
