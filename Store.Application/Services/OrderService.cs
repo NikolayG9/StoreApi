@@ -142,7 +142,7 @@ namespace Store.Application.Services
             _logger.LogInformation($"New Order - {emailBody}");
 
             await _mailService.SendEmailAsync(order.OrderInformation.Email, emailSubject, emailBody, pdfData, cancellationToken);
-            await _mailService.SendEmailAsync("nikolaygolovach9@gmail.com", emailSubject, emailBody, pdfData, cancellationToken);
+            await _mailService.SendEmailAsync("eloriennebridal.tech@gmail.com", emailSubject, emailBody, pdfData, cancellationToken);
 
             return _mapper.Map<OrderDto>(order);
         }
